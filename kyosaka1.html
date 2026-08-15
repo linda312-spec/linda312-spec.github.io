@@ -8,10 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="京阪旅遊記">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#dc2626">
+    <meta name="theme-color" content="#e2e8f0">
     <title>京阪雙城深度旅遊記</title>
     
-    <!-- 專屬 App Icon (Base64 SVG) -->
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iI2RjMjYyNiIvPjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9IjYwIiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4NiIgcj0iMTAiIGZpbGw9IiMwMDAiLz48Y2lyY2xlIGN4PSIxMTYiIGN5PSI4NiIgcj0iMTAiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNOTYgMTEwIEMxMTAgMTEwLDExMCAxMzAsOTYgMTMwIEM4MiAxMzAsODIgMTEwLDk2IDExMCBaIiBmaWxsPSIjZGMyNjI2Ii8+PC9zdmc+">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iI2RjMjYyNiIvPjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9IjYwIiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4NiIgcj0iMTAiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNOTYgMTEwIEMxMTAgMTEwLDExMCAxMzAsOTYgMTMwIEM4MiAxMzAsODIgMTEwLDk2IDExMCBaIiBmaWxsPSIjZGMyNjI2Ii8+PC9zdmc+">
 
@@ -27,45 +26,45 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        /* 允許輸入框可以選取與輸入文字 */
         input, textarea {
             -webkit-user-select: auto;
             user-select: auto;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        #voucher-modal { display: none; }
+        
+        /* 彈窗限制在 App 框架內，不再覆蓋整個螢幕 */
+        #voucher-modal { display: none; flex-direction: column; }
         #voucher-modal.active { display: flex; animation: fadeInModal 0.2s ease-out forwards; }
         @keyframes fadeInModal { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(4px); } }
+        
+        /* 新增：讓 Day 按鈕容器可以自動換行，避免需要橫向捲動 */
+        #day-selector {
+            flex-wrap: wrap; 
+            justify-content: center; /* 置中對齊會比較好看 */
+        }
     </style>
 </head>
-<body class="bg-slate-900 flex justify-center h-screen overflow-hidden">
 
-<div class="w-full h-full max-w-md bg-slate-50 flex flex-col relative shadow-2xl overflow-hidden">
+<!-- 背景改為淺灰，確保跟 App 框架有對比。使用 dVH 讓手機瀏覽器高度精準 -->
+<body class="bg-slate-300 flex justify-center items-center h-[100dvh] overflow-hidden p-3 sm:p-6">
 
-    <!-- 憑證彈窗 Modal -->
-    <div id="voucher-modal" class="fixed inset-0 z-[60] items-center justify-center p-4 bg-slate-900/70">
-        <button onclick="closeVoucher()" class="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white backdrop-blur-md transition-colors z-50">
-            <i class="ph ph-x text-xl"></i>
+<!-- App 框架容器：上下左右預留空間，圓角，類似真實手機外觀，防擋防誤觸 -->
+<div class="w-full h-full max-h-[92dvh] max-w-[420px] bg-slate-50 flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] overflow-hidden rounded-[2.5rem] border-[6px] border-white">
+
+    <!-- 憑證彈窗 Modal (Absolute 絕對定位於 App 內，X按鈕保證按得到) -->
+    <div id="voucher-modal" class="absolute inset-0 z-[60] items-center justify-center p-5 bg-slate-900/80">
+        <button onclick="closeVoucher()" class="absolute top-5 right-5 p-2.5 bg-white/20 hover:bg-white/30 rounded-full text-white backdrop-blur-md transition-colors z-50 shadow-lg">
+            <i class="ph-bold ph-x text-lg"></i>
         </button>
-        <div id="voucher-content" class="w-full max-w-sm"></div>
-    </div>
-
-    <!-- PWA 安裝提示 (會在點擊後消失) -->
-    <div id="pwa-install-tip" class="absolute top-20 left-4 right-4 bg-slate-800 text-white text-xs p-3 rounded-xl shadow-2xl z-50 flex items-center justify-between cursor-pointer animate-pulse" onclick="this.style.display='none'">
-        <div class="flex items-center gap-2">
-            <i class="ph-fill ph-export text-xl text-indigo-400"></i>
-            <span>點擊瀏覽器分享 ➔ <b>「加入主畫面」</b>，即可當作 App 離線使用！</span>
-        </div>
-        <i class="ph ph-x"></i>
+        <div id="voucher-content" class="w-full max-w-sm max-h-[85%] flex flex-col"></div>
     </div>
 
     <!-- 頂部 Header -->
-    <header class="relative px-5 pt-12 pb-6 shadow-md z-10 overflow-hidden bg-red-600 shrink-0">
+    <header class="relative px-5 pt-8 pb-5 shadow-md z-10 overflow-hidden bg-red-600 shrink-0">
         <svg class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none" style="background-color: #dc2626" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="daruma-pattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
@@ -83,7 +82,7 @@
         </svg>
         <div class="relative z-10">
             <h1 class="text-2xl font-black text-white tracking-wide drop-shadow-md">京阪雙城深度旅遊記</h1>
-            <p class="text-sm text-red-100 mt-1 drop-shadow-sm font-medium">關西 6天5夜 黃金動線與預算</p>
+            <p class="text-sm text-red-100 mt-0.5 drop-shadow-sm font-medium">關西 6天5夜 黃金動線與預算</p>
         </div>
     </header>
 
@@ -91,19 +90,16 @@
 
         <!-- Tab 1: 每日行程 -->
         <div id="tab-itinerary" class="tab-content active">
-            <div id="day-selector" class="flex overflow-x-auto gap-3 px-5 py-4 no-scrollbar bg-slate-50 sticky top-0 z-10 shadow-sm border-b border-slate-100">
-                <!-- 由 JS 動態生成 -->
-            </div>
-            <div id="itinerary-list" class="p-5 space-y-4">
-                <!-- 由 JS 動態生成 -->
-            </div>
+            <!-- 移除 overflow-x-auto 和 no-scrollbar，改用 flex-wrap -->
+            <div id="day-selector" class="flex gap-2 px-3 py-3 bg-slate-50 sticky top-0 z-10 shadow-sm border-b border-slate-100"></div>
+            <div id="itinerary-list" class="p-4 space-y-4"></div>
         </div>
 
         <!-- Tab 2: 預算記帳 -->
         <div id="tab-budget" class="tab-content">
-            <div class="p-5 space-y-6">
+            <div class="p-4 space-y-6">
                 <!-- 總花費卡片 -->
-                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-5 text-white shadow-lg relative overflow-hidden">
                     <div class="absolute -right-2 -top-2 opacity-10"><i class="ph-fill ph-calculator text-9xl"></i></div>
                     <p class="text-slate-300 text-sm font-medium mb-1">總花費累計 (4人)</p>
                     <h2 class="text-4xl font-black tracking-tight" id="grand-total-display">NT$ 0</h2>
@@ -113,7 +109,7 @@
                     </div>
                 </div>
 
-                <!-- 固定支出清單 -->
+                <!-- 固定支出清單 (折疊式) -->
                 <div>
                     <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1"><i class="ph-fill ph-lock-key text-slate-400"></i> 已知固定支出 (點擊可收折)</h3>
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -136,26 +132,26 @@
                                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">日幣 (JPY)</label>
                                 <div class="flex items-center gap-1 mt-1">
                                     <span class="text-slate-400 font-bold text-lg">¥</span>
-                                    <input type="number" id="jpy-input" class="w-full bg-slate-50 text-base font-bold text-slate-800 rounded-lg px-2 py-2 border border-slate-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" placeholder="輸入金額">
+                                    <input type="number" id="jpy-input" class="w-full bg-slate-50 text-base font-bold text-slate-800 rounded-lg px-2 py-1.5 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors" placeholder="輸入金額">
                                 </div>
                             </div>
                             <i class="ph-bold ph-arrows-left-right text-slate-300 mt-5"></i>
                             <div class="w-20 shrink-0">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">匯率</label>
-                                <input type="number" id="rate-input" step="0.001" value="0.21" class="w-full bg-slate-50 text-base font-bold text-slate-800 rounded-lg px-2 py-2 border border-slate-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors mt-1 text-center">
+                                <input type="number" id="rate-input" step="0.001" value="0.21" class="w-full bg-slate-50 text-base font-bold text-slate-800 rounded-lg px-2 py-1.5 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors mt-1 text-center">
                             </div>
                         </div>
 
                         <form id="expense-form" class="flex gap-2 items-end">
                             <div class="flex-1">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">消費項目</label>
-                                <input type="text" id="expense-name" placeholder="如: 晚餐/藥妝" required class="w-full bg-slate-50 text-sm font-medium rounded-lg px-3 py-2.5 border border-slate-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors mt-1">
+                                <input type="text" id="expense-name" placeholder="如: 晚餐/藥妝" required class="w-full bg-slate-50 text-sm font-medium rounded-lg px-3 py-2 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors mt-1">
                             </div>
                             <div class="w-24 shrink-0">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">台幣 (TWD)</label>
-                                <input type="number" id="expense-amount" placeholder="自動換算" required class="w-full bg-red-50 text-sm font-bold text-red-600 rounded-lg px-3 py-2.5 border border-red-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors mt-1">
+                                <input type="number" id="expense-amount" placeholder="自動換算" required class="w-full bg-red-50 text-sm font-bold text-red-600 rounded-lg px-3 py-2 border border-red-200 focus:outline-none focus:border-red-500 transition-colors mt-1">
                             </div>
-                            <button type="submit" class="bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 active:scale-95 transition-all shrink-0">
+                            <button type="submit" class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 active:scale-95 transition-all shrink-0 h-[38px]">
                                 <i class="ph-bold ph-plus text-lg"></i>
                             </button>
                         </form>
@@ -171,71 +167,83 @@
             </div>
         </div>
 
-        <!-- Tab 3: 行前確認 -->
+        <!-- Tab 3: 專屬地圖 (直接連結 Google Maps) -->
+        <div id="tab-maps" class="tab-content h-full">
+            <div class="p-5 flex flex-col items-center justify-center h-full pb-20">
+                <!-- 專屬景點導航卡片 -->
+                <div class="w-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[2rem] p-8 shadow-2xl text-white flex flex-col items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.02]">
+                    <!-- 背景裝飾圖示 -->
+                    <i class="ph-fill ph-map-trifold absolute -right-8 -bottom-8 text-[12rem] opacity-10"></i>
+                    <i class="ph-fill ph-navigation-arrow absolute top-6 right-8 text-4xl opacity-20"></i>
+                    
+                    <!-- 內容 -->
+                    <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-inner relative z-10 border border-white/30">
+                        <i class="ph-fill ph-google-logo text-4xl text-white"></i>
+                    </div>
+                    
+                    <h2 class="text-2xl font-black tracking-wide mb-2 relative z-10 text-center">專屬行程儲存地標</h2>
+                    <p class="text-sm text-blue-100 text-center mb-8 relative z-10 font-medium px-4 leading-relaxed">
+                        已為您整理好本次旅行的<br/>完整 Google Maps 清單
+                    </p>
+                    
+                    <!-- 連結按鈕 -->
+                    <a href="https://maps.app.goo.gl/TNxogxAoDMAGPNM76" target="_blank" class="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 text-base font-black rounded-2xl transition-all flex justify-center items-center gap-2 shadow-lg active:scale-95 relative z-10">
+                        <i class="ph-bold ph-arrow-square-out text-xl"></i> 立即打開 Google Maps
+                    </a>
+                </div>
+                
+                <!-- 溫馨提示 -->
+                <p class="text-xs text-slate-400 mt-6 flex items-center gap-1.5 font-medium">
+                    <i class="ph-fill ph-info text-slate-300"></i> 點擊將直接喚醒手機內建的地圖 App
+                </p>
+            </div>
+        </div>
+
+        <!-- Tab 4: 行前確認 -->
         <div id="tab-checklist" class="tab-content">
-            <div class="p-5 space-y-6">
-                <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
-                    <i class="ph-fill ph-check-square-offset text-red-600 text-xl"></i> 行前最終確認清單
-                </h2>
+            <div class="p-4 space-y-6">
+                <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2"><i class="ph-fill ph-check-square-offset text-red-600 text-xl"></i> 行前最終確認清單</h2>
                 <div id="checklist-container"></div>
             </div>
         </div>
 
-        <!-- Tab 4: 行李清單 -->
+        <!-- Tab 5: 行李清單 -->
         <div id="tab-luggage" class="tab-content">
-            <div class="p-5 space-y-6">
-                <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
-                    <i class="ph-fill ph-suitcase text-red-600 text-xl"></i> 行李打包清單
-                </h2>
+            <div class="p-4 space-y-6">
+                <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2"><i class="ph-fill ph-suitcase text-red-600 text-xl"></i> 行李打包清單</h2>
                 <div id="luggage-container"></div>
-            </div>
-        </div>
-
-        <!-- Tab 5: 專屬地圖 (新增) -->
-        <div id="tab-maps" class="tab-content">
-            <div class="p-5 space-y-6 h-full flex flex-col items-center justify-center mt-20">
-                <div class="bg-blue-50 p-6 rounded-full mb-4 shadow-inner">
-                    <i class="ph-fill ph-map-trifold text-6xl text-blue-500"></i>
-                </div>
-                <h2 class="text-2xl font-black text-slate-800 tracking-wide">專屬儲存地標</h2>
-                <p class="text-sm text-slate-500 text-center px-4 leading-relaxed font-medium mt-2">
-                    已為您整理好本次京阪旅行的所有儲存地點。<br>點擊下方按鈕將直接開啟 Google Maps App，導航不迷路！
-                </p>
-                <a href="https://maps.app.goo.gl/TNxogxAoDMAGPNM76" target="_blank" class="mt-8 w-full max-w-[280px] py-4 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-base font-black rounded-2xl transition-all flex justify-center items-center gap-2 shadow-xl shadow-blue-600/30">
-                    <i class="ph-bold ph-arrow-square-out text-xl"></i> 打開 Google Maps
-                </a>
             </div>
         </div>
 
     </main>
 
-    <!-- 底部 5 個導覽按鈕 -->
-    <nav class="bg-white border-t border-slate-200 flex justify-around items-center pb-safe pt-2 absolute bottom-0 w-full h-16 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-20">
+    <!-- 底部 5 個導覽按鈕 (加厚底部留白防誤觸) -->
+    <nav class="bg-white border-t border-slate-200 flex justify-around items-center pt-2 pb-4 absolute bottom-0 w-full h-[72px] shadow-[0_-10px_20px_rgba(0,0,0,0.04)] z-20">
         <button onclick="switchTab('itinerary')" id="nav-itinerary" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-red-600 active:scale-95">
-            <i class="ph-fill ph-calendar-blank text-2xl"></i>
+            <i class="ph-fill ph-calendar-blank text-xl"></i>
             <span class="text-[10px] font-bold">行程</span>
         </button>
         <button onclick="switchTab('budget')" id="nav-budget" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
-            <i class="ph-fill ph-wallet text-2xl"></i>
+            <i class="ph-fill ph-wallet text-xl"></i>
             <span class="text-[10px] font-bold">記帳</span>
         </button>
         <button onclick="switchTab('maps')" id="nav-maps" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
-            <i class="ph-fill ph-map-trifold text-2xl"></i>
+            <i class="ph-fill ph-map-trifold text-xl"></i>
             <span class="text-[10px] font-bold">地圖</span>
         </button>
         <button onclick="switchTab('checklist')" id="nav-checklist" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
-            <i class="ph-fill ph-check-square text-2xl"></i>
+            <i class="ph-fill ph-check-square text-xl"></i>
             <span class="text-[10px] font-bold">確認</span>
         </button>
         <button onclick="switchTab('luggage')" id="nav-luggage" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
-            <i class="ph-fill ph-suitcase text-2xl"></i>
+            <i class="ph-fill ph-suitcase text-xl"></i>
             <span class="text-[10px] font-bold">行李</span>
         </button>
     </nav>
 </div>
 
 <script>
-    // --- 資料區 ---
+    // --- 資料區 (包含精準色系、小圖示) ---
     const itineraryData = [
       {
         day: "Day 1", date: "8/25 (二)",
@@ -243,25 +251,23 @@
           { time: "07:30-08:30", title: "台中出發 ➔ 桃園機場", transport: "樂高專車", desc: "司機至指定地點接駕，前往桃園機場 T1。", mapQuery: "Taoyuan+International+Airport+Terminal+1", voucherType: "transfer" },
           { time: "11:05-14:55", title: "國泰航空 CX564 (TPE ➔ KIX)", transport: "飛行 (約2.5小時)", desc: "準備起飛，展開京阪雙城之旅！", mapQuery: "Kansai+International+Airport", voucherType: "flight" },
           { time: "14:55-16:00", title: "抵達關西機場 (KIX) 通關", transport: "步行", desc: "盡速完成通關、領取 4 件大行李。", mapQuery: "Kansai+International+Airport" },
-          { time: "16:14-17:30", title: "搭乘特急前往京都", transport: "JR Haruka (約76分)", desc: "對號座，大型行李放置於車廂後方行李架。", mapQuery: "Kyoto+Station", voucherType: "haruka" },
-          { time: "17:30-18:00", title: "京都車站 ➔ OMO3", transport: "步行 (約15分)", desc: "推行李散步至飯店辦理入住。", mapQuery: "OMO3+Kyoto+Toji", voucherType: "kyoto_hotel" },
-          { time: "18:30-20:00", title: "晚餐：穂屋-MINORIYA-", transport: "步行 (約5分)", desc: "享用飯店周邊高評價的濃郁拉麵，安頓休息。", mapQuery: "Minoriya+Kyoto" }
+          { time: "16:14-17:30", title: "搭乘特急前往京都", transport: "JR Haruka", desc: "對號座，大型行李放置於車廂後方行李架。", mapQuery: "Kyoto+Station", voucherType: "haruka" },
+          { time: "17:30-18:00", title: "京都車站 ➔ OMO3", transport: "步行散步", desc: "推行李散步至飯店辦理入住。", mapQuery: "OMO3+Kyoto+Toji", voucherType: "kyoto_hotel" },
+          { time: "18:30-20:00", title: "晚餐：穂屋-MINORIYA-", transport: "步行", desc: "享用飯店周邊高評價的濃郁拉麵，安頓休息。", mapQuery: "Minoriya+Kyoto" }
         ]
       },
       {
         day: "Day 2", date: "8/26 (三)",
         events: [
-          { time: "08:30-09:30", title: "飯店出發 ➔ 伏見稻荷", transport: "計程車 (15分)", desc: "飯店吃完早餐出門。直接搭計程車前往伏見稻荷大社。", mapQuery: "Fushimi+Inari+Taisha" },
-          { time: "09:30-11:00", title: "伏見稻荷大社", transport: "步行散策", desc: "走千本鳥居前段拍照即可折返，沿路走走逛逛小吃街。", mapQuery: "Fushimi+Inari+Taisha" },
-          { time: "11:00-11:20", title: "伏見稻荷 ➔ 清水寺", transport: "計程車 (20分)", desc: "直接要求司機開到清水寺門口，省去爬坡體力。", mapQuery: "Kiyomizu-dera" },
-      { time: "11:20-12:30", title: "清水寺參拜", transport: "步行散策", desc: "門票¥500。抽籤、買御守，拍攝仁王門、清水舞台、三重塔、音羽瀑布。", mapQuery: "Kiyomizu-dera" },
-      { time: "12:30-13:30", title: "午餐：清水順正 おかべ家", transport: "順坡步行", desc: "於清水寺周邊享用名物湯豆腐/湯葉鍋。", mapQuery: "Kiyomizu+Junsei+Okabeya" },
-      { time: "13:30-14:30", title: "產寧坂 (三年坂) 伴手禮", transport: "步行散策", desc: "必買必逛：七味家本舖(七味粉)、伊藤軒/SOU・SOU(打卡糰子)、伊藤久右衛門(抹茶專賣)。", mapQuery: "Sannenzaka", icon: "shopping-bag" },
-      { time: "14:30-15:30", title: "二寧坂 (二年坂) ＆ 小吃", transport: "步行散策", desc: "留意轉彎處絕美街景。必吃：藤菜美(醬油糰子)、GOKAGO(濃郁抹茶)。", mapQuery: "Nineizaka", icon: "shopping-bag" },
-      { time: "15:30-15:40", title: "前往 % ARABICA", transport: "步行 (10分)", desc: "散步前往八坂之塔旁的 % ARABICA 京都東山店買咖啡。", mapQuery: "Arabica+Kyoto+Higashiyama", icon: "coffee" },
-      { time: "15:40-16:30", title: "花見小路 ➔ 祇園", transport: "散步散策", desc: "沿路拍五重塔、八坂通，欣賞祇園花街的藝妓街區氛圍。", mapQuery: "Hanamikoji+Street" },
-          { time: "17:30-19:30", title: "晚餐：モリタ屋 木屋町店", transport: "步行 (約10分)", desc: "於鴨川納涼床享用頂級壽喜燒。", mapQuery: "Moritaya+Kiyamachi" },
-          { time: "19:30-20:00", title: "返回 OMO3 京都東寺", transport: "計程車 (約15分)", desc: "吃飽買完水，直接在路口攔車回飯店打包。", mapQuery: "OMO3+Kyoto+Toji" }
+          { time: "08:30-09:30", title: "飯店出發 ➔ 伏見稻荷", transport: "計程車", desc: "飯店吃完早餐出門。直接搭計程車前往伏見稻荷大社。", mapQuery: "Fushimi+Inari+Taisha" },
+          { time: "09:30-11:00", title: "伏見稻荷大社", transport: "步行", desc: "走千本鳥居前段拍照即可折返，沿路走走逛逛小吃街。", mapQuery: "Fushimi+Inari+Taisha" },
+          { time: "11:00-11:20", title: "伏見稻荷 ➔ 清水寺", transport: "計程車", desc: "直接要求司機開到清水寺門口，省去爬坡體力。", mapQuery: "Kiyomizu-dera" },
+          { time: "11:20-12:30", title: "清水寺參拜", transport: "步行", desc: "門票¥500。抽籤、買御守，拍攝仁王門、清水舞台、三重塔、音羽瀑布。", mapQuery: "Kiyomizu-dera" },
+          { time: "12:30-15:30", title: "二三年坂 ＆ 午餐伴手禮", transport: "順坡步行", desc: "沿路往下逛，留意轉彎處。午餐吃清水順正湯豆腐，沿街採買七味家本舖、伊藤軒糰子、藤菜美醬油糰子，並前往 GOKAGO 喝抹茶！", mapQuery: "Sannenzaka", icon: "ph-shopping-bag", iconColor: "text-pink-500" },
+          { time: "15:30-15:40", title: "前往 % ARABICA", transport: "步行", desc: "散步前往八坂之塔旁的 % ARABICA 京都東山店買咖啡。", mapQuery: "Arabica+Kyoto+Higashiyama", icon: "ph-coffee", iconColor: "text-amber-700" },
+          { time: "15:40-16:30", title: "花見小路 ➔ 祇園", transport: "步行散策", desc: "沿路拍五重塔、八坂通，欣賞祇園花街的藝妓街區氛圍。", mapQuery: "Hanamikoji+Street" },
+          { time: "17:30-19:30", title: "晚餐：モリタ屋 木屋町店", transport: "步行", desc: "於鴨川納涼床享用頂級壽喜燒。", mapQuery: "Moritaya+Kiyamachi" },
+          { time: "19:30-20:00", title: "返回 OMO3 京都東寺", transport: "計程車", desc: "吃飽買完水，直接在路口攔車回飯店打包。", mapQuery: "OMO3+Kyoto+Toji" }
         ]
       },
       {
@@ -269,36 +275,36 @@
         events: [
           { time: "08:00-08:30", title: "退房 ➔ 專屬司機接駕", transport: "私人包車", desc: "帶齊 4 件大行李辦理退房，行李交由司機放上車，輕鬆出發。", mapQuery: "OMO3+Kyoto+Toji" },
           { time: "10:30-12:00", title: "天橋立 ＆ 智恩寺 / 迴轉橋", transport: "私人包車", desc: "搭乘纜車(¥1000/人)體驗跨下窺視，觀賞迴轉橋與智恩寺。", mapQuery: "Amanohashidate+View+Land" },
-          { time: "12:00-13:30", title: "午餐：二反田", transport: "步行/包車", desc: "享用在地人氣海鮮/壽司 (尚未訂位)。", mapQuery: "Nitanda+Amanohashidate" },
+          { time: "12:00-13:30", title: "午餐：二反田", transport: "步行", desc: "享用在地人氣海鮮/壽司 (尚未訂位)。", mapQuery: "Nitanda+Amanohashidate" },
           { time: "14:00-15:30", title: "伊根舟屋 ＆ 觀光遊船", transport: "私人包車", desc: "搭乘遊船(¥1200/人)餵海鷗老鷹，近距離拍攝水上舟屋。", mapQuery: "Ine+no+Funaya" },
-          { time: "15:30-16:30", title: "下午茶：舟屋日和", transport: "步行", desc: "在絕美海景咖啡廳享受慢活節奏☕️。", mapQuery: "Funaya+Biyori", icon: "coffee" },
+          { time: "15:30-16:30", title: "下午茶：舟屋日和", transport: "步行", desc: "在絕美海景咖啡廳享受慢活節奏☕️。", mapQuery: "Funaya+Biyori", icon: "ph-coffee", iconColor: "text-amber-700" },
           { time: "16:30-19:00", title: "跨城直達 ➔ 大阪 The Peak", transport: "私人包車", desc: "車上睡覺休息，司機連人帶行李直達大阪飯店門口。", mapQuery: "The+Peak+Nipponbashi+Apartment", voucherType: "osaka_hotel" },
-          { time: "19:30-21:00", title: "晚餐：法善寺/道頓堀周邊", transport: "步行 (約8分)", desc: "享用千房大阪燒或神座拉麵，餐後散步回飯店。", mapQuery: "Hozenji+Yokocho" }
+          { time: "19:30-21:00", title: "晚餐：法善寺/道頓堀周邊", transport: "步行", desc: "享用千房大阪燒或神座拉麵，餐後散步回飯店。", mapQuery: "Hozenji+Yokocho" }
         ]
       },
       {
         day: "Day 4", date: "8/28 (五)",
         events: [
-          { time: "09:00-10:00", title: "日本橋 ➔ 箕面萱野", transport: "地鐵 (約45分)", desc: "「日本橋站」搭 1 站至難波，轉御堂筋線直達終點。", mapQuery: "Minoh-kayano+Station" },
-          { time: "10:00-11:30", title: "勝尾寺", transport: "計程車 (約15分)", desc: "拍攝滿山達摩不倒翁。", mapQuery: "Katsuoji" },
-          { time: "11:30-13:30", title: "午餐：蕎麦処 KAJIKASOU", transport: "計程車 (約15分)", desc: "享受大正浪漫風情庭園與精緻蕎麥麵 (事前預約)。", mapQuery: "Kajikasou+Minoh" },
-          { time: "13:30-14:30", title: "箕面 ➔ 大阪城公園", transport: "阪急轉地鐵 (約50分)", desc: "阪急搭至「石橋阪大前」轉車至梅田，轉地鐵至「森之宮站」。", mapQuery: "Osaka+Castle+Park" },
-          { time: "14:30-15:30", title: "大阪城公園散策", transport: "步行", desc: "不登天守閣，於護城河外圍與巨石前合影。", mapQuery: "Osaka+Castle" },
-          { time: "15:30-16:00", title: "森之宮 ➔ 惠美須町", transport: "地鐵 (約20分)", desc: "搭至「堺筋本町站」轉乘堺筋線至「惠美須町站」。", mapQuery: "Ebisucho+Station" },
-          { time: "16:00-19:30", title: "通天閣 ＆ 新世界晚餐", transport: "步行 (約5分)", desc: "體驗 TOWER SLIDER 溜滑梯，晚餐享用名產串炸。", mapQuery: "Tsutenkaku" },
-          { time: "19:30-20:00", title: "返回 The Peak", transport: "地鐵 (約10分)", desc: "從「惠美須町站」搭 1 站回「日本橋站」，出站即到家。", mapQuery: "The+Peak+Nipponbashi+Apartment" }
+          { time: "08:30-09:30", title: "日本橋 ➔ 箕面萱野", transport: "地鐵", desc: "「日本橋站」搭 1 站至難波，轉御堂筋線直達終點。", mapQuery: "Minoh-kayano+Station" },
+          { time: "09:30-11:00", title: "勝尾寺", transport: "計程車", desc: "拍攝滿山達摩不倒翁。", mapQuery: "Katsuoji" },
+          { time: "11:00-13:00", title: "午餐：蕎麦処 KAJIKASOU", transport: "計程車", desc: "享受大正浪漫風情庭園與精緻蕎麥麵 (事前預約)。", mapQuery: "Kajikasou+Minoh" },
+          { time: "13:00-14:00", title: "箕面 ➔ 大阪城公園", transport: "阪急轉地鐵", desc: "阪急搭至「石橋阪大前」轉車至梅田，轉地鐵至「森之宮站」。", mapQuery: "Osaka+Castle+Park" },
+          { time: "14:00-15:00", title: "大阪城公園散策", transport: "步行", desc: "不登天守閣，於護城河外圍與巨石前合影。", mapQuery: "Osaka+Castle" },
+          { time: "15:00-15:30", title: "森之宮 ➔ 惠美須町", transport: "地鐵", desc: "搭至「堺筋本町站」轉乘堺筋線至「惠美須町站」。", mapQuery: "Ebisucho+Station" },
+          { time: "15:30-19:00", title: "通天閣 ＆ 新世界晚餐", transport: "步行", desc: "體驗 TOWER SLIDER 溜滑梯，晚餐享用名產串炸。", mapQuery: "Tsutenkaku" },
+          { time: "19:00-19:30", title: "返回 The Peak", transport: "地鐵", desc: "從「惠美須町站」搭 1 站回「日本橋站」，出站即到家。", mapQuery: "The+Peak+Nipponbashi+Apartment" }
         ]
       },
       {
         day: "Day 5", date: "8/29 (六)",
         events: [
-          { time: "08:30-10:00", title: "早餐：木津市場", transport: "地鐵 (約15分)", desc: "搭至「動物園前站」轉乘至「大国町站」出站即達。", mapQuery: "Kizu+Market" },
-          { time: "10:00-11:00", title: "難波八阪神社", transport: "步行 (約5分)", desc: "距木津市場極近，順光拍攝巨型獅子頭。", mapQuery: "Namba+Yasaka+Jinja" },
-          { time: "11:00-11:30", title: "大国町 ➔ 梅田", transport: "地鐵直達 (約15分)", desc: "一車直達梅田，免換車。", mapQuery: "Umeda+Station" },
-          { time: "11:30-14:30", title: "午餐：滝見小路", transport: "步行 (約10分)", desc: "於藍天大廈 B1 復古美食街享用午餐。", mapQuery: "Takimi+Koji" },
+          { time: "08:30-10:00", title: "早餐：木津市場", transport: "地鐵", desc: "搭至「動物園前站」轉乘至「大国町站」出站即達。", mapQuery: "Kizu+Market" },
+          { time: "10:00-11:00", title: "難波八阪神社", transport: "步行", desc: "距木津市場極近，順光拍攝巨型獅子頭。", mapQuery: "Namba+Yasaka+Jinja" },
+          { time: "11:00-11:30", title: "大国町 ➔ 梅田", transport: "地鐵", desc: "一車直達梅田，免換車。", mapQuery: "Umeda+Station" },
+          { time: "11:30-14:30", title: "午餐：滝見小路", transport: "步行", desc: "於藍天大廈 B1 復古美食街享用午餐。", mapQuery: "Takimi+Koji" },
           { time: "14:30-17:00", title: "梅田空中庭園展望台", transport: "電梯", desc: "欣賞日落前的大阪市景。", mapQuery: "Umeda+Sky+Building" },
-          { time: "17:00-20:00", title: "心齋橋 / 道頓堀 採買", transport: "地鐵直達 (約15分)", desc: "梅田直達心齋橋，集中火力買齊藥妝與雜貨。", mapQuery: "Shinsaibashi-suji", icon: "shopping-bag" },
-          { time: "20:00-21:30", title: "晚餐：松阪牛 M 或 壽司", transport: "步行 (約5分)", desc: "慶功宴大餐！餐後直接提著戰利品回飯店。", mapQuery: "Matsusakagyu+Yakiniku+M" }
+          { time: "17:00-20:00", title: "心齋橋 / 道頓堀 採買", transport: "地鐵", desc: "梅田直達心齋橋，集中火力買齊藥妝與雜貨。", mapQuery: "Shinsaibashi-suji", icon: "ph-shopping-bag", iconColor: "text-pink-500" },
+          { time: "20:00-21:30", title: "晚餐：松阪牛 M 或 壽司", transport: "步行", desc: "慶功宴大餐！餐後直接提著戰利品回飯店。", mapQuery: "Matsusakagyu+Yakiniku+M" }
         ]
       },
       {
@@ -306,7 +312,7 @@
         events: [
           { time: "08:30-11:00", title: "起床打包 ＆ 早午餐", transport: "步行", desc: "就近於商圈吃早餐，11:00 辦理退房。", mapQuery: "Nipponbashi" },
           { time: "11:00-11:15", title: "返回住宿樓下門口", transport: "步行", desc: "推行李至 The Peak 一樓大門，等待專車。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
-          { time: "11:15-12:30", title: "專車直達關西機場", transport: "INNN 拼車 (約60分)", desc: "行李交給司機，全家上車補眠，直達 KIX 出境大廳。", mapQuery: "Kansai+International+Airport" },
+          { time: "11:15-12:30", title: "專車直達關西機場", transport: "INNN 拼車", desc: "行李交給司機，全家上車補眠，直達 KIX 出境大廳。", mapQuery: "Kansai+International+Airport" },
           { time: "12:30-16:15", title: "機場報到與免稅衝刺", transport: "步行", desc: "報到掛行李，採買最後伴手禮。", mapQuery: "Kansai+International+Airport" },
           { time: "16:15-18:15", title: "國泰航空 CX565 (KIX ➔ TPE)", transport: "飛行 (約3小時)", desc: "帶著滿滿戰利品返回台灣，旅途圓滿結束！", mapQuery: "", voucherType: "flight" },
           { time: "18:15", title: "桃園機場 ➔ 台中專車接送", transport: "樂高專車", desc: "抵達台灣後，專車接送返回台中溫暖的家。", mapQuery: "", voucherType: "transfer" }
@@ -316,12 +322,12 @@
 
     const fixedBudgetData = [
       { status: "paid", icon: "ph-airplane-tilt", color: "text-blue-500", bg: "bg-blue-100", title: "交通機票", desc: "國泰航空", total: 56224, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
-      { status: "unpaid", icon: "ph-car", color: "text-indigo-500", bg: "bg-indigo-100", title: "專車接送", desc: "台中⇌桃園 ($4400來回)", total: 4400, tag: "尾款$3800", tagColor: "bg-red-100 text-red-600" },
+      { status: "unpaid", icon: "ph-car-profile", color: "text-indigo-500", bg: "bg-indigo-100", title: "專車接送", desc: "台中⇌桃園 ($1900×2趟)", total: 3800, tag: "未付尾款", tagColor: "bg-red-100 text-red-600" },
       { status: "paid", icon: "ph-shield-check", color: "text-emerald-500", bg: "bg-emerald-100", title: "旅遊保險", desc: "中信升級版", total: 4952, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
       { status: "unpaid", icon: "ph-wifi-high", color: "text-cyan-500", bg: "bg-cyan-100", title: "網卡通訊", desc: "eSIM", total: 2400, tag: "未買未付", tagColor: "bg-red-100 text-red-600" },
       { status: "paid", icon: "ph-train", color: "text-blue-600", bg: "bg-blue-100", title: "JR Haruka", desc: "機場 ➔ 京都", total: 1600, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
-      { status: "unpaid", icon: "ph-car", color: "text-slate-500", bg: "bg-slate-200", title: "INNN 拼車", desc: "大阪 ➔ 機場 (¥8760)", total: 1840, tag: "未預約未付", tagColor: "bg-red-100 text-red-600" },
-      { status: "unpaid", icon: "ph-car-profile", color: "text-amber-600", bg: "bg-amber-100", title: "王先生包車", desc: "Day3 行程 (¥58000)", total: 12180, tag: "現場付現", tagColor: "bg-red-100 text-red-600" }, 
+      { status: "unpaid", icon: "ph-car-profile", color: "text-slate-500", bg: "bg-slate-200", title: "INNN 拼車", desc: "大阪 ➔ 機場 (¥8760)", total: 1840, tag: "未預約未付", tagColor: "bg-red-100 text-red-600" },
+      { status: "unpaid", icon: "ph-car", color: "text-amber-600", bg: "bg-amber-100", title: "王先生包車", desc: "Day3 行程 (¥58000)", total: 12180, tag: "現場付現", tagColor: "bg-red-100 text-red-600" }, 
       { status: "unpaid", icon: "ph-ticket", color: "text-teal-500", bg: "bg-teal-100", title: "市區景點門票", desc: "清水寺/勝尾寺/通天閣等", total: 3780, tag: "現場付現", tagColor: "bg-amber-100 text-amber-700" }, 
       { status: "unpaid", icon: "ph-ticket", color: "text-teal-600", bg: "bg-teal-100", title: "包車景點門票", desc: "纜車¥1000+船¥1200/人", total: 1848, tag: "現場付現", tagColor: "bg-amber-100 text-amber-700" }, 
       { status: "paid", icon: "ph-bed", color: "text-rose-500", bg: "bg-rose-100", title: "京都住宿", desc: "OMO3 京都東寺", total: 6332, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
@@ -416,13 +422,16 @@
     let currentExchangeRate = 0.21;
     let currentDayIndex = 0; // 預設跳到 Day 1
     let fixedBudgetExpanded = { paid: false, unpaid: true }; // 預設打開待付款，收起已付清
+    let mapScaleVal = 1;
+    let currentMapIndex = 0;
 
     function renderDaySelector() {
         const container = document.getElementById('day-selector');
+        // 稍微縮小按鈕的 padding 和字體，並設定 flex-1 讓它們平分寬度
         container.innerHTML = itineraryData.map((d, idx) => `
-            <button onclick="setDay(${idx})" class="flex flex-col items-center min-w-[72px] p-2.5 rounded-xl transition-all ${currentDayIndex === idx ? 'bg-red-600 text-white shadow-md scale-105' : 'bg-white text-slate-500 border border-slate-200'}">
-                <span class="text-xs font-bold mb-1">${d.day}</span>
-                <span class="text-[11px] ${currentDayIndex === idx ? 'text-red-100' : 'text-slate-400'}">${d.date}</span>
+            <button onclick="setDay(${idx})" class="flex-1 flex flex-col items-center py-2 px-1 rounded-xl transition-all ${currentDayIndex === idx ? 'bg-red-600 text-white shadow-md scale-105' : 'bg-white text-slate-500 border border-slate-200'}">
+                <span class="text-[11px] font-bold mb-0.5 whitespace-nowrap">${d.day}</span>
+                <span class="text-[9px] ${currentDayIndex === idx ? 'text-red-100' : 'text-slate-400'} whitespace-nowrap">${d.date}</span>
             </button>
         `).join('');
     }
@@ -432,9 +441,7 @@
         const events = itineraryData[currentDayIndex].events;
         
         container.innerHTML = events.map(ev => {
-            let titleIcon = '';
-            if(ev.icon === 'shopping-bag') titleIcon = '<i class="ph-fill ph-shopping-bag text-pink-500 mr-1"></i>';
-            if(ev.icon === 'coffee') titleIcon = '<i class="ph-fill ph-coffee text-amber-700 mr-1"></i>';
+            let titleIcon = ev.icon ? `<i class="ph-fill ${ev.icon} ${ev.iconColor} mr-1.5 text-lg"></i>` : '';
             
             let mapLink = ev.mapQuery ? `
                 <a href="https://www.google.com/maps/search/?api=1&query=${ev.mapQuery}" target="_blank" class="text-blue-500 bg-blue-50 p-2 rounded-full hover:bg-blue-100 transition-colors shrink-0 ml-auto active:scale-95 shadow-sm">
@@ -448,31 +455,29 @@
                     </button>
                 </div>` : '';
 
+            // 判斷交通工具顏色與圖示
             let transportColor = 'bg-slate-100 text-slate-600'; 
             let transportIcon = 'ph-map-pin';
             const t = ev.transport;
 
             if (t.includes('飛行')) {
-                transportColor = 'bg-sky-100 text-sky-700'; // 飛機 (淺藍)
+                transportColor = 'bg-sky-100 text-sky-700';
                 transportIcon = 'ph-airplane-tilt';
             } else if (t.includes('地鐵') || t.includes('JR') || t.includes('電車') || t.includes('阪急')) {
-                transportColor = 'bg-emerald-100 text-emerald-700'; // 鐵路 (翠綠)
+                transportColor = 'bg-emerald-100 text-emerald-700';
                 transportIcon = 'ph-train';
             } else if (t.includes('專車') || t.includes('拼車')) {
-                transportColor = 'bg-indigo-100 text-indigo-700'; // 接送專車 (靛藍)
+                transportColor = 'bg-indigo-100 text-indigo-700';
                 transportIcon = 'ph-car-profile';
             } else if (t.includes('計程車') || t.includes('包車')) {
-                transportColor = 'bg-amber-100 text-amber-700'; // 計程車/包車 (琥珀黃)
+                transportColor = 'bg-amber-100 text-amber-700';
                 transportIcon = 'ph-car';
             } else if (t.includes('步行') || t.includes('散步') || t.includes('順坡')) {
-                transportColor = 'bg-stone-100 text-stone-600'; // 步行 (石頭灰)
+                transportColor = 'bg-stone-100 text-stone-600';
                 transportIcon = 'ph-sneaker';
             } else if (t.includes('電梯') || t.includes('纜車') || t.includes('船') || t.includes('行程內建')) {
-                transportColor = 'bg-purple-100 text-purple-700'; // 特殊交通 (紫色)
+                transportColor = 'bg-purple-100 text-purple-700';
                 transportIcon = 'ph-paper-plane-tilt';
-            } else {
-                transportColor = 'bg-rose-100 text-rose-600'; // 其他
-                transportIcon = 'ph-map-pin';
             }
 
             return `
@@ -483,7 +488,7 @@
                             <i class="ph-bold ph-clock"></i> ${ev.time}
                         </span>
                         <span class="text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 ${transportColor}">
-                            <i class="ph-fill ${transportIcon}"></i> ${ev.transport}
+                            <i class="ph-fill ${transportIcon} text-sm"></i> ${ev.transport}
                         </span>
                     </div>
                     <div class="flex items-center gap-2 pl-2 mt-2 pr-2">
@@ -590,7 +595,6 @@
         document.getElementById('per-person-display').innerText = `NT$ ${Math.round(grandTotal/4).toLocaleString()}`;
     }
 
-    // 表單事件監聽 (匯率連動)
     document.getElementById('rate-input').addEventListener('input', (e) => {
         currentExchangeRate = parseFloat(e.target.value) || 0;
         const jpy = document.getElementById('jpy-input').value;
@@ -648,6 +652,26 @@
         renderChecklist(luggages, 'luggage-container', 'toggleLuggageItem');
     }
 
+    function switchMap(index) {
+        currentMapIndex = index;
+        mapScaleVal = 1;
+        document.getElementById('railway-map-img').src = MAP_URLS[index];
+        document.getElementById('railway-map-img').style.transform = `scale(${mapScaleVal})`;
+        
+        document.getElementById('map-btn-0').className = `flex-1 py-2 text-sm font-bold rounded-xl transition-colors ${index === 0 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500'}`;
+        document.getElementById('map-btn-1').className = `flex-1 py-2 text-sm font-bold rounded-xl transition-colors ${index === 1 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500'}`;
+    }
+
+    function zoomMap(delta) {
+        mapScaleVal = Math.max(0.5, Math.min(mapScaleVal + delta, 4));
+        document.getElementById('railway-map-img').style.transform = `scale(${mapScaleVal})`;
+    }
+
+    function resetMapZoom() {
+        mapScaleVal = 1;
+        document.getElementById('railway-map-img').style.transform = `scale(${mapScaleVal})`;
+    }
+
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(el => {
@@ -658,8 +682,9 @@
         
         document.getElementById(`tab-${tabId}`).classList.add('active');
         const activeBtn = document.getElementById(`nav-${tabId}`);
-        const colorClass = 'text-red-600';
-        const fillClass = 'fill-red-50';
+        const colorClass = tabId === 'maps' ? 'text-indigo-600' : 'text-red-600';
+        const fillClass = tabId === 'maps' ? 'fill-indigo-50' : 'fill-red-50';
+        
         activeBtn.classList.remove('text-slate-400');
         activeBtn.classList.add(colorClass);
         activeBtn.querySelector('i').classList.add(fillClass);
@@ -734,7 +759,7 @@
             </div>`;
         } else if (type === 'kyoto_hotel') {
             html = `
-            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full h-[80vh] flex flex-col">
+            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-h-[600px] h-[85%] flex flex-col">
               <div class="bg-orange-500 p-6 text-white flex justify-between items-center shrink-0 relative overflow-hidden">
                 <div class="z-10"><p class="text-orange-100 text-[10px] font-black uppercase tracking-widest mb-1">KLOOK / Expedia</p><h2 class="text-2xl font-black tracking-wide">京都訂房確認單</h2></div>
                 <i class="ph-fill ph-bed text-7xl opacity-20 absolute -right-2 -bottom-2 z-0"></i>
@@ -759,7 +784,7 @@
             </div>`;
         } else if (type === 'osaka_hotel') {
             html = `
-            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full h-[85vh] flex flex-col">
+            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-h-[600px] h-[85%] flex flex-col">
               <div class="bg-blue-800 p-6 text-white flex justify-between items-center shrink-0 relative overflow-hidden">
                 <div class="z-10"><p class="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-1">Trip.com</p><h2 class="text-2xl font-black tracking-wide">大阪入住憑證</h2></div>
                 <i class="ph-fill ph-buildings text-7xl opacity-20 absolute -right-2 -bottom-2 z-0"></i>
@@ -821,7 +846,7 @@
         document.getElementById('voucher-modal').classList.remove('active');
     }
 
-    // --- 初始化執行 ---
+    // --- 程式初始化執行 ---
     window.onload = () => {
         renderDaySelector();
         renderItinerary();
