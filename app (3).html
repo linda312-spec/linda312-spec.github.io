@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <!-- PWA App Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="京阪旅遊記">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#dc2626">
+    <title>京阪雙城深度旅遊記</title>
+    
+    <!-- 專屬 App Icon (Base64 SVG) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iI2RjMjYyNiIvPjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9IjYwIiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4NiIgcj0iMTAiIGZpbGw9IiMwMDAiLz48Y2lyY2xlIGN4PSIxMTYiIGN5PSI4NiIgcj0iMTAiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNOTYgMTEwIEMxMTAgMTEwLDExMCAxMzAsOTYgMTMwIEM4MiAxMzAsODIgMTEwLDk2IDExMCBaIiBmaWxsPSIjZGMyNjI2Ii8+PC9zdmc+">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iI2RjMjYyNiIvPjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9IjYwIiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4NiIgcj0iMTAiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNOTYgMTEwIEMxMTAgMTEwLDExMCAxMzAsOTYgMTMwIEM4MiAxMzAsODIgMTEwLDk2IDExMCBaIiBmaWxsPSIjZGMyNjI2Ii8+PC9zdmc+">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        /* 允許輸入框可以選取與輸入文字 */
+        input, textarea {
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        #voucher-modal { display: none; }
+        #voucher-modal.active { display: flex; animation: fadeInModal 0.2s ease-out forwards; }
+        @keyframes fadeInModal { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(4px); } }
+    </style>
+</head>
+<body class="bg-slate-900 flex justify-center h-screen overflow-hidden">
+
+<div class="w-full h-full max-w-md bg-slate-50 flex flex-col relative shadow-2xl overflow-hidden">
+
+    <!-- 憑證彈窗 Modal -->
+    <div id="voucher-modal" class="fixed inset-0 z-[60] items-center justify-center p-4 bg-slate-900/70">
+        <button onclick="closeVoucher()" class="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white backdrop-blur-md transition-colors z-50">
+            <i class="ph ph-x text-xl"></i>
+        </button>
+        <div id="voucher-content" class="w-full max-w-sm"></div>
+    </div>
+
+    <!-- PWA 安裝提示 (會在點擊後消失) -->
+    <div id="pwa-install-tip" class="absolute top-20 left-4 right-4 bg-slate-800 text-white text-xs p-3 rounded-xl shadow-2xl z-50 flex items-center justify-between cursor-pointer animate-pulse" onclick="this.style.display='none'">
+        <div class="flex items-center gap-2">
+            <i class="ph-fill ph-export text-xl text-indigo-400"></i>
+            <span>點擊瀏覽器分享 ➔ <b>「加入主畫面」</b>，即可當作 App 離線使用！</span>
+        </div>
+        <i class="ph ph-x"></i>
+    </div>
+
+    <!-- 頂部 Header -->
+    <header class="relative px-5 pt-12 pb-6 shadow-md z-10 overflow-hidden bg-red-600 shrink-0">
+        <svg class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none" style="background-color: #dc2626" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="daruma-pattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+                <path d="M40 15 C 60 15, 65 35, 65 55 C 65 75, 50 75, 40 75 C 30 75, 15 75, 15 55 C 15 35, 20 15, 40 15 Z" fill="#fff" stroke="#450a0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <ellipse cx="40" cy="45" rx="16" ry="14" fill="#ffe4e6" stroke="#450a0a" stroke-width="1.5"/>
+                <circle cx="34" cy="43" r="2.5" fill="#450a0a"/>
+                <circle cx="46" cy="43" r="2.5" fill="#450a0a"/>
+                <path d="M29 38 Q 34 35 37 39 M43 39 Q 46 35 51 38" stroke="#450a0a" fill="none" stroke-width="2" stroke-linecap="round"/>
+                <path d="M35 52 Q 40 55 45 52" stroke="#450a0a" fill="none" stroke-width="2" stroke-linecap="round"/>
+                <path d="M30 62 Q 40 70 50 62" stroke="#450a0a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M35 66 L 45 66" stroke="#450a0a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+              </pattern>
+            </defs>
+            <rect x="0" y="0" width="100%" height="100%" fill="url(#daruma-pattern)" />
+        </svg>
+        <div class="relative z-10">
+            <h1 class="text-2xl font-black text-white tracking-wide drop-shadow-md">京阪雙城深度旅遊記</h1>
+            <p class="text-sm text-red-100 mt-1 drop-shadow-sm font-medium">關西 6天5夜 黃金動線與預算</p>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto overflow-x-hidden pb-24 relative bg-slate-50">
+
+        <!-- Tab 1: 每日行程 -->
+        <div id="tab-itinerary" class="tab-content active">
+            <div id="day-selector" class="flex overflow-x-auto gap-3 px-5 py-4 no-scrollbar bg-slate-50 sticky top-0 z-10 shadow-sm border-b border-slate-100">
+                <!-- 由 JS 動態生成 -->
+            </div>
+            <div id="itinerary-list" class="p-5 space-y-4">
+                <!-- 由 JS 動態生成 -->
+            </div>
+        </div>
+
+        <!-- Tab 2: 預算記帳 -->
+        <div id="tab-budget" class="tab-content">
+            <div class="p-5 space-y-6">
+                <!-- 總花費卡片 -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-2 -top-2 opacity-10"><i class="ph-fill ph-calculator text-9xl"></i></div>
+                    <p class="text-slate-300 text-sm font-medium mb-1">總花費累計 (4人)</p>
+                    <h2 class="text-4xl font-black tracking-tight" id="grand-total-display">NT$ 0</h2>
+                    <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
+                        <span class="text-slate-300 text-xs">單人平均</span>
+                        <span class="text-xl font-bold text-emerald-400" id="per-person-display">NT$ 0</span>
+                    </div>
+                </div>
+
+                <!-- 固定支出清單 -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1"><i class="ph-fill ph-lock-key text-slate-400"></i> 已知固定支出 (點擊可收折)</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div id="fixed-budget-list"></div>
+                        <div class="p-3 bg-slate-50 text-right border-t border-slate-100">
+                            <span class="text-xs text-slate-500 font-bold" id="fixed-subtotal-display">小計：NT$ 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 動態記帳區 -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1">
+                        <i class="ph-fill ph-coins text-amber-500"></i> 即時匯率與旅途記帳
+                    </h3>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
+                        <div class="flex items-center gap-2 mb-3 border-b border-slate-100 pb-3">
+                            <div class="flex-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">日幣 (JPY)</label>
+                                <div class="flex items-center gap-1 mt-1">
+                                    <span class="text-slate-400 font-bold text-lg">¥</span>
+                                    <input type="number" id="jpy-input" class="w-full bg-slate-50 text-base font-bold text-slate-800 rounded-lg px-2 py-2 border border-slate-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors" placeholder="輸入金額">
+                                </div>
+                            </div>
+                            <i class="ph-bold ph-arrows-left-right text-slate-300 mt-5"></i>
+                            <div class="w-20 shrink-0">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">匯率</label>
+                                <input type="number" id="rate-input" step="0.001" value="0.21" class="w-full bg-slate-50 text-base font-bold text-slate-800 rounded-lg px-2 py-2 border border-slate-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors mt-1 text-center">
+                            </div>
+                        </div>
+
+                        <form id="expense-form" class="flex gap-2 items-end">
+                            <div class="flex-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">消費項目</label>
+                                <input type="text" id="expense-name" placeholder="如: 晚餐/藥妝" required class="w-full bg-slate-50 text-sm font-medium rounded-lg px-3 py-2.5 border border-slate-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors mt-1">
+                            </div>
+                            <div class="w-24 shrink-0">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">台幣 (TWD)</label>
+                                <input type="number" id="expense-amount" placeholder="自動換算" required class="w-full bg-red-50 text-sm font-bold text-red-600 rounded-lg px-3 py-2.5 border border-red-200 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors mt-1">
+                            </div>
+                            <button type="submit" class="bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 active:scale-95 transition-all shrink-0">
+                                <i class="ph-bold ph-plus text-lg"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[100px]">
+                        <div id="dynamic-expense-list"></div>
+                        <div class="p-3 bg-red-50 text-right border-t border-red-100">
+                            <span class="text-xs text-red-600 font-black tracking-wide" id="dynamic-subtotal-display">動態小計：NT$ 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: 行前確認 -->
+        <div id="tab-checklist" class="tab-content">
+            <div class="p-5 space-y-6">
+                <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
+                    <i class="ph-fill ph-check-square-offset text-red-600 text-xl"></i> 行前最終確認清單
+                </h2>
+                <div id="checklist-container"></div>
+            </div>
+        </div>
+
+        <!-- Tab 4: 行李清單 -->
+        <div id="tab-luggage" class="tab-content">
+            <div class="p-5 space-y-6">
+                <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
+                    <i class="ph-fill ph-suitcase text-red-600 text-xl"></i> 行李打包清單
+                </h2>
+                <div id="luggage-container"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 底部 4 個導覽按鈕 (移除地圖) -->
+    <nav class="bg-white border-t border-slate-200 flex justify-around items-center pb-safe pt-2 absolute bottom-0 w-full h-16 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] z-20">
+        <button onclick="switchTab('itinerary')" id="nav-itinerary" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-red-600 active:scale-95">
+            <i class="ph-fill ph-calendar-blank text-2xl"></i>
+            <span class="text-[10px] font-bold">行程</span>
+        </button>
+        <button onclick="switchTab('budget')" id="nav-budget" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
+            <i class="ph-fill ph-wallet text-2xl"></i>
+            <span class="text-[10px] font-bold">記帳</span>
+        </button>
+        <button onclick="switchTab('checklist')" id="nav-checklist" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
+            <i class="ph-fill ph-check-square text-2xl"></i>
+            <span class="text-[10px] font-bold">確認</span>
+        </button>
+        <button onclick="switchTab('luggage')" id="nav-luggage" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
+            <i class="ph-fill ph-suitcase text-2xl"></i>
+            <span class="text-[10px] font-bold">行李</span>
+        </button>
+    </nav>
+</div>
+
+<script>
+    // --- 資料區 ---
+    const itineraryData = [
+      {
+        day: "Day 1", date: "8/25 (二)",
+        events: [
+          { time: "07:30-08:30", title: "台中出發 ➔ 桃園機場", transport: "樂高專車", desc: "司機至指定地點接駕，前往桃園機場 T1。", mapQuery: "Taoyuan+International+Airport+Terminal+1", voucherType: "transfer" },
+          { time: "11:05-14:55", title: "國泰航空 CX564 (TPE ➔ KIX)", transport: "飛行 (約2.5小時)", desc: "準備起飛，展開京阪雙城之旅！", mapQuery: "Kansai+International+Airport", voucherType: "flight" },
+          { time: "14:55-16:00", title: "抵達關西機場 (KIX) 通關", transport: "步行", desc: "盡速完成通關、領取 4 件大行李。", mapQuery: "Kansai+International+Airport" },
+          { time: "16:14-17:30", title: "搭乘特急前往京都", transport: "JR Haruka (約76分)", desc: "對號座，大型行李放置於車廂後方行李架。", mapQuery: "Kyoto+Station", voucherType: "haruka" },
+          { time: "17:30-18:00", title: "京都車站 ➔ OMO3", transport: "步行 (約15分)", desc: "推行李散步至飯店辦理入住。", mapQuery: "OMO3+Kyoto+Toji", voucherType: "kyoto_hotel" },
+          { time: "18:30-20:00", title: "晚餐：穂屋-MINORIYA-", transport: "步行 (約5分)", desc: "享用飯店周邊高評價的濃郁拉麵，安頓休息。", mapQuery: "Minoriya+Kyoto" }
+        ]
+      },
+      {
+        day: "Day 2", date: "8/26 (三)",
+        events: [
+          { time: "08:30-09:30", title: "飯店出發 ➔ 伏見稻荷", transport: "計程車 (15分)", desc: "飯店吃完早餐出門。直接搭計程車前往伏見稻荷大社。", mapQuery: "Fushimi+Inari+Taisha" },
+          { time: "09:30-11:00", title: "伏見稻荷大社", transport: "步行散策", desc: "走千本鳥居前段拍照即可折返，沿路走走逛逛小吃街。", mapQuery: "Fushimi+Inari+Taisha" },
+          { time: "11:00-11:20", title: "伏見稻荷 ➔ 清水寺", transport: "計程車 (20分)", desc: "直接要求司機開到清水寺門口，省去爬坡體力。", mapQuery: "Kiyomizu-dera" },
+          { time: "11:20-12:30", title: "清水寺參拜", transport: "步行散策", desc: "門票¥500。抽籤、買御守，拍攝仁王門、清水舞台、三重塔、音羽瀑布。", mapQuery: "Kiyomizu-dera" },
+          { time: "12:30-15:30", title: "二三年坂 ＆ 午餐伴手禮", transport: "順坡步行", desc: "沿路往下逛，留意轉彎處。午餐吃湯豆腐，並前往 GOKAGO 喝抹茶，沿街採買伴手禮！", mapQuery: "Sannenzaka", icon: "shopping-bag" },
+          { time: "15:30-15:40", title: "前往 % ARABICA", transport: "步行 (10分)", desc: "散步前往八坂之塔旁的 % ARABICA 京都東山店買咖啡。", mapQuery: "Arabica+Kyoto+Higashiyama", icon: "coffee" },
+          { time: "15:40-16:30", title: "花見小路 ➔ 祇園", transport: "散步散策", desc: "沿路拍五重塔、八坂通，欣賞祇園花街的藝妓街區氛圍。", mapQuery: "Hanamikoji+Street" },
+          { time: "17:30-19:30", title: "晚餐：モリタ屋 木屋町店", transport: "步行 (約10分)", desc: "於鴨川納涼床享用頂級壽喜燒。", mapQuery: "Moritaya+Kiyamachi" },
+          { time: "19:30-20:00", title: "返回 OMO3 京都東寺", transport: "計程車 (約15分)", desc: "吃飽買完水，直接在路口攔車回飯店打包。", mapQuery: "OMO3+Kyoto+Toji" }
+        ]
+      },
+      {
+        day: "Day 3", date: "8/27 (四)",
+        events: [
+          { time: "08:00-08:30", title: "退房 ➔ 專屬司機接駕", transport: "私人包車", desc: "帶齊 4 件大行李辦理退房，行李交由司機放上車，輕鬆出發。", mapQuery: "OMO3+Kyoto+Toji" },
+          { time: "10:30-12:00", title: "天橋立 ＆ 智恩寺 / 迴轉橋", transport: "私人包車", desc: "搭乘纜車(¥1000/人)體驗跨下窺視，觀賞迴轉橋與智恩寺。", mapQuery: "Amanohashidate+View+Land" },
+          { time: "12:00-13:30", title: "午餐：二反田", transport: "步行/包車", desc: "享用在地人氣海鮮/壽司 (尚未訂位)。", mapQuery: "Nitanda+Amanohashidate" },
+          { time: "14:00-15:30", title: "伊根舟屋 ＆ 觀光遊船", transport: "私人包車", desc: "搭乘遊船(¥1200/人)餵海鷗老鷹，近距離拍攝水上舟屋。", mapQuery: "Ine+no+Funaya" },
+          { time: "15:30-16:30", title: "下午茶：舟屋日和", transport: "步行", desc: "在絕美海景咖啡廳享受慢活節奏☕️。", mapQuery: "Funaya+Biyori", icon: "coffee" },
+          { time: "16:30-19:00", title: "跨城直達 ➔ 大阪 The Peak", transport: "私人包車", desc: "車上睡覺休息，司機連人帶行李直達大阪飯店門口。", mapQuery: "The+Peak+Nipponbashi+Apartment", voucherType: "osaka_hotel" },
+          { time: "19:30-21:00", title: "晚餐：法善寺/道頓堀周邊", transport: "步行 (約8分)", desc: "享用千房大阪燒或神座拉麵，餐後散步回飯店。", mapQuery: "Hozenji+Yokocho" }
+        ]
+      },
+      {
+        day: "Day 4", date: "8/28 (五)",
+        events: [
+          { time: "09:00-10:00", title: "日本橋 ➔ 箕面萱野", transport: "地鐵 (約45分)", desc: "「日本橋站」搭 1 站至難波，轉御堂筋線直達終點。", mapQuery: "Minoh-kayano+Station" },
+          { time: "10:00-11:30", title: "勝尾寺", transport: "計程車 (約15分)", desc: "拍攝滿山達摩不倒翁。", mapQuery: "Katsuoji" },
+          { time: "11:30-13:30", title: "午餐：蕎麦処 KAJIKASOU", transport: "計程車 (約15分)", desc: "享受大正浪漫風情庭園與精緻蕎麥麵 (事前預約)。", mapQuery: "Kajikasou+Minoh" },
+          { time: "13:30-14:30", title: "箕面 ➔ 大阪城公園", transport: "阪急轉地鐵 (約50分)", desc: "阪急搭至「石橋阪大前」轉車至梅田，轉地鐵至「森之宮站」。", mapQuery: "Osaka+Castle+Park" },
+          { time: "14:30-15:30", title: "大阪城公園散策", transport: "步行", desc: "不登天守閣，於護城河外圍與巨石前合影。", mapQuery: "Osaka+Castle" },
+          { time: "15:30-16:00", title: "森之宮 ➔ 惠美須町", transport: "地鐵 (約20分)", desc: "搭至「堺筋本町站」轉乘堺筋線至「惠美須町站」。", mapQuery: "Ebisucho+Station" },
+          { time: "16:00-19:30", title: "通天閣 ＆ 新世界晚餐", transport: "步行 (約5分)", desc: "體驗 TOWER SLIDER 溜滑梯，晚餐享用名產串炸。", mapQuery: "Tsutenkaku" },
+          { time: "19:30-20:00", title: "返回 The Peak", transport: "地鐵 (約10分)", desc: "從「惠美須町站」搭 1 站回「日本橋站」，出站即到家。", mapQuery: "The+Peak+Nipponbashi+Apartment" }
+        ]
+      },
+      {
+        day: "Day 5", date: "8/29 (六)",
+        events: [
+          { time: "08:30-10:00", title: "早餐：木津市場", transport: "地鐵 (約15分)", desc: "搭至「動物園前站」轉乘至「大国町站」出站即達。", mapQuery: "Kizu+Market" },
+          { time: "10:00-11:00", title: "難波八阪神社", transport: "步行 (約5分)", desc: "距木津市場極近，順光拍攝巨型獅子頭。", mapQuery: "Namba+Yasaka+Jinja" },
+          { time: "11:00-11:30", title: "大国町 ➔ 梅田", transport: "地鐵直達 (約15分)", desc: "一車直達梅田，免換車。", mapQuery: "Umeda+Station" },
+          { time: "11:30-14:30", title: "午餐：滝見小路", transport: "步行 (約10分)", desc: "於藍天大廈 B1 復古美食街享用午餐。", mapQuery: "Takimi+Koji" },
+          { time: "14:30-17:00", title: "梅田空中庭園展望台", transport: "電梯", desc: "欣賞日落前的大阪市景。", mapQuery: "Umeda+Sky+Building" },
+          { time: "17:00-20:00", title: "心齋橋 / 道頓堀 採買", transport: "地鐵直達 (約15分)", desc: "梅田直達心齋橋，集中火力買齊藥妝與雜貨。", mapQuery: "Shinsaibashi-suji", icon: "shopping-bag" },
+          { time: "20:00-21:30", title: "晚餐：松阪牛 M 或 壽司", transport: "步行 (約5分)", desc: "慶功宴大餐！餐後直接提著戰利品回飯店。", mapQuery: "Matsusakagyu+Yakiniku+M" }
+        ]
+      },
+      {
+        day: "Day 6", date: "8/30 (日)",
+        events: [
+          { time: "08:30-11:00", title: "起床打包 ＆ 早午餐", transport: "步行", desc: "就近於商圈吃早餐，11:00 辦理退房。", mapQuery: "Nipponbashi" },
+          { time: "11:00-11:15", title: "返回住宿樓下門口", transport: "步行", desc: "推行李至 The Peak 一樓大門，等待專車。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
+          { time: "11:15-12:30", title: "專車直達關西機場", transport: "INNN 拼車 (約60分)", desc: "行李交給司機，全家上車補眠，直達 KIX 出境大廳。", mapQuery: "Kansai+International+Airport" },
+          { time: "12:30-16:15", title: "機場報到與免稅衝刺", transport: "步行", desc: "報到掛行李，採買最後伴手禮。", mapQuery: "Kansai+International+Airport" },
+          { time: "16:15-18:15", title: "國泰航空 CX565 (KIX ➔ TPE)", transport: "飛行 (約3小時)", desc: "帶著滿滿戰利品返回台灣，旅途圓滿結束！", mapQuery: "", voucherType: "flight" },
+          { time: "18:15", title: "桃園機場 ➔ 台中專車接送", transport: "樂高專車", desc: "抵達台灣後，專車接送返回台中溫暖的家。", mapQuery: "", voucherType: "transfer" }
+        ]
+      }
+    ];
+
+    const fixedBudgetData = [
+      { status: "paid", icon: "ph-airplane-tilt", color: "text-blue-500", bg: "bg-blue-100", title: "交通機票", desc: "國泰航空", total: 56224, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { status: "unpaid", icon: "ph-car", color: "text-indigo-500", bg: "bg-indigo-100", title: "專車接送", desc: "台中⇌桃園 ($4400來回)", total: 4400, tag: "尾款$3800", tagColor: "bg-red-100 text-red-600" },
+      { status: "paid", icon: "ph-shield-check", color: "text-emerald-500", bg: "bg-emerald-100", title: "旅遊保險", desc: "中信升級版", total: 4952, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { status: "unpaid", icon: "ph-wifi-high", color: "text-cyan-500", bg: "bg-cyan-100", title: "網卡通訊", desc: "eSIM", total: 2400, tag: "未買未付", tagColor: "bg-red-100 text-red-600" },
+      { status: "paid", icon: "ph-train", color: "text-blue-600", bg: "bg-blue-100", title: "JR Haruka", desc: "機場 ➔ 京都", total: 1600, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { status: "unpaid", icon: "ph-car", color: "text-slate-500", bg: "bg-slate-200", title: "INNN 拼車", desc: "大阪 ➔ 機場 (¥8760)", total: 1840, tag: "未預約未付", tagColor: "bg-red-100 text-red-600" },
+      { status: "unpaid", icon: "ph-car-profile", color: "text-amber-600", bg: "bg-amber-100", title: "王先生包車", desc: "Day3 行程 (¥58000)", total: 12180, tag: "現場付現", tagColor: "bg-red-100 text-red-600" }, 
+      { status: "unpaid", icon: "ph-ticket", color: "text-teal-500", bg: "bg-teal-100", title: "市區景點門票", desc: "清水寺/勝尾寺/通天閣等", total: 3780, tag: "現場付現", tagColor: "bg-amber-100 text-amber-700" }, 
+      { status: "unpaid", icon: "ph-ticket", color: "text-teal-600", bg: "bg-teal-100", title: "包車景點門票", desc: "纜車¥1000+船¥1200/人", total: 1848, tag: "現場付現", tagColor: "bg-amber-100 text-amber-700" }, 
+      { status: "paid", icon: "ph-bed", color: "text-rose-500", bg: "bg-rose-100", title: "京都住宿", desc: "OMO3 京都東寺", total: 6332, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { status: "paid", icon: "ph-bed", color: "text-rose-600", bg: "bg-rose-100", title: "大阪住宿", desc: "The Peak", total: 10008, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+    ];
+
+    let checklists = [
+      {
+        category: "✈️ 機票與通關",
+        items: [
+          { name: "確認機票資料 (英文名字是否與護照相符)", isDone: false },
+          { name: "出發前 48 小時線上登機報到", isDone: false },
+          { name: "提前填寫 Visit Japan Web (VJW) 並截圖 QR Code", isDone: false }
+        ]
+      },
+      {
+        category: "🚙 交通與住宿",
+        items: [
+          { name: "確認台灣機場接送 (去/回程)", isDone: false },
+          { name: "預約日本機場接送 INNN (大阪回程)", isDone: false },
+          { name: "和飯店確認是否成功預訂 (京都 OMO3、大阪 The Peak)", isDone: false },
+          { name: "Haruka 車票線上劃位", isDone: false },
+          { name: "確認餐廳訂位、票券是否已購買完成", isDone: false }
+        ]
+      },
+      {
+        category: "💰 金錢與保險",
+        items: [
+          { name: "投保旅平險 (中信產險每人 $1238) 確認生效", isDone: true },
+          { name: "準備日幣現金 (每人約 NTD $10000 + 現有¥18,062)", isDone: false },
+          { name: "確認信用卡海外刷卡功能 / 綁定 Apple Pay", isDone: false },
+          { name: "儲值 ICOCA (每人約 JPY $5000)", isDone: true }
+        ]
+      },
+      {
+        category: "📱 網卡與實用 App",
+        items: [
+          { name: "購買 eSIM 並確認開通設定方式", isDone: false },
+          { name: "下載 Google Maps (建議將飯店與景點加星號)", isDone: false },
+          { name: "下載天氣與餐廳 App (tenki.jp, Tabelog, Kuli Kuli)", isDone: false },
+          { name: "下載日本優惠券 App (省錢必備)", isDone: false }
+        ]
+      }
+    ];
+
+    let luggages = [
+      { 
+        category: "👜 隨身包包", 
+        items: [ 
+          { name: "護照 (效期需大於6個月)", isDone: false }, 
+          { name: "日幣現金 / 零錢包", isDone: false }, 
+          { name: "信用卡、金融卡", isDone: false },
+          { name: "VJW 入境 QR Code 截圖", isDone: false }, 
+          { name: "行動電源", isDone: false }, 
+          { name: "電子機票", isDone: false },
+          { name: "長輩個人慢性藥品 (隨身帶最安全!)", isDone: false }
+        ] 
+      },
+      { 
+        category: "🛍️ 日本常用", 
+        items: [  
+          { name: "環保袋、塑膠袋 (找不到垃圾桶時可用)", isDone: false }, 
+          { name: "壓縮袋", isDone: false }, 
+          { name: "行李秤", isDone: false }
+        ] 
+      },
+      { 
+        category: "🧴 日常用品", 
+        items: [ 
+          { name: "保養品 / 化妝品", isDone: false }, 
+          { name: "防曬 / 卸妝", isDone: false }, 
+          { name: "梳子 / 髮油 / 香水", isDone: false }, 
+          { name: "衛生紙、濕紙巾", isDone: false },
+          { name: "陽傘 / 小風扇", isDone: false }, 
+          { name: "拋棄式毛巾、浴巾、洗臉巾", isDone: false },
+          { name: "盥洗包", isDone: false },
+          { name: "休足時間、足貼 (每天走萬步必備!)", isDone: false }
+        ] 
+      },
+      { 
+        category: "🔌 3C用品類", 
+        items: [ 
+          { name: "多條充電線", isDone: false }, 
+          { name: "相機、腳架、自拍棒", isDone: false }, 
+          { name: "相機電池", isDone: false }, 
+          { name: "電池夾鏈袋", isDone: false }
+        ] 
+      }
+    ];
+
+    let dynamicExpenses = [{ id: 1, name: "ICOCA 儲值 (4人)", amount: 2100 }];
+    let currentExchangeRate = 0.21;
+    let currentDayIndex = 1; // 預設跳到 Day 2
+    let fixedBudgetExpanded = { paid: false, unpaid: true }; // 預設打開待付款，收起已付清
+
+    function renderDaySelector() {
+        const container = document.getElementById('day-selector');
+        container.innerHTML = itineraryData.map((d, idx) => `
+            <button onclick="setDay(${idx})" class="flex flex-col items-center min-w-[72px] p-2.5 rounded-xl transition-all ${currentDayIndex === idx ? 'bg-red-600 text-white shadow-md scale-105' : 'bg-white text-slate-500 border border-slate-200'}">
+                <span class="text-xs font-bold mb-1">${d.day}</span>
+                <span class="text-[11px] ${currentDayIndex === idx ? 'text-red-100' : 'text-slate-400'}">${d.date}</span>
+            </button>
+        `).join('');
+    }
+
+    function renderItinerary() {
+        const container = document.getElementById('itinerary-list');
+        const events = itineraryData[currentDayIndex].events;
+        
+        container.innerHTML = events.map(ev => {
+            let titleIcon = '';
+            if(ev.icon === 'shopping-bag') titleIcon = '<i class="ph-fill ph-shopping-bag text-pink-500 mr-1"></i>';
+            if(ev.icon === 'coffee') titleIcon = '<i class="ph-fill ph-coffee text-amber-700 mr-1"></i>';
+            
+            let mapLink = ev.mapQuery ? `
+                <a href="https://www.google.com/maps/search/?api=1&query=${ev.mapQuery}" target="_blank" class="text-blue-500 bg-blue-50 p-2 rounded-full hover:bg-blue-100 transition-colors shrink-0 ml-auto active:scale-95 shadow-sm">
+                    <i class="ph-bold ph-arrow-square-out text-base"></i>
+                </a>` : '';
+                
+            let voucherBtn = ev.voucherType ? `
+                <div class="mt-3 pl-2 pr-2 border-t border-slate-50 pt-3">
+                    <button onclick="openVoucher('${ev.voucherType}')" class="w-full py-3 text-white text-sm font-bold rounded-xl transition-colors flex justify-center items-center gap-2 shadow-md active:scale-95 ${ev.voucherType === 'transfer' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-800 hover:bg-slate-700'}">
+                        <i class="ph-fill ph-ticket text-lg"></i> 查看憑證卡
+                    </button>
+                </div>` : '';
+
+            let transportColor = ev.voucherType === 'transfer' ? 'bg-indigo-50 text-indigo-700' : (ev.transport.includes('包車') ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-600');
+
+            return `
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500 rounded-l-2xl"></div>
+                    <div class="flex justify-between items-start mb-2 pl-2">
+                        <span class="bg-slate-100 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5">
+                            <i class="ph-bold ph-clock"></i> ${ev.time}
+                        </span>
+                        <span class="text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 ${transportColor}">
+                            <i class="ph-fill ph-map-pin"></i> ${ev.transport}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2 pl-2 mt-2 pr-2">
+                        <h3 class="text-base font-black text-slate-800 leading-tight flex items-center tracking-wide">${titleIcon}${ev.title}</h3>
+                        ${mapLink}
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2 pl-2 leading-relaxed font-medium">${ev.desc}</p>
+                    ${voucherBtn}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function setDay(index) {
+        currentDayIndex = index;
+        renderDaySelector();
+        renderItinerary();
+    }
+
+    function toggleFixedGroup(group) {
+        fixedBudgetExpanded[group] = !fixedBudgetExpanded[group];
+        renderFixedBudget();
+    }
+
+    function renderFixedBudget() {
+        const container = document.getElementById('fixed-budget-list');
+        const paidItems = fixedBudgetData.filter(item => item.status === 'paid');
+        const unpaidItems = fixedBudgetData.filter(item => item.status === 'unpaid');
+        
+        const totalPaid = paidItems.reduce((sum, item) => sum + item.total, 0);
+        const totalUnpaid = unpaidItems.reduce((sum, item) => sum + item.total, 0);
+
+        const renderGroup = (title, items, total, groupId, icon, colorClass, isExpanded) => {
+            if(items.length === 0) return '';
+            let groupHtml = `
+            <div class="border-b border-slate-100 last:border-0 overflow-hidden">
+                <div onclick="toggleFixedGroup('${groupId}')" class="flex items-center justify-between p-3.5 bg-slate-50 cursor-pointer hover:bg-slate-100 active:bg-slate-200 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ${icon} ${colorClass} text-lg"></i>
+                        <span class="text-sm font-bold text-slate-700">${title}</span>
+                        <span class="text-[10px] font-bold text-slate-400 bg-white px-1.5 py-0.5 rounded-md border border-slate-200 shadow-sm">${items.length}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-black text-slate-800">NT$ ${total.toLocaleString()}</span>
+                        <i class="ph-bold ph-caret-${isExpanded ? 'up' : 'down'} text-slate-400 transition-transform"></i>
+                    </div>
+                </div>
+                <div class="${isExpanded ? 'block' : 'hidden'} bg-white">
+            `;
+            
+            items.forEach(item => {
+                groupHtml += `
+                    <div class="flex items-center justify-between p-3.5 border-t border-slate-50 last:border-0 ml-2 mr-2">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 rounded-xl ${item.bg} ${item.color}"><i class="${item.icon} text-lg"></i></div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <p class="text-sm font-bold text-slate-800 leading-none">${item.title}</p>
+                                    ${item.tag ? `<span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold ${item.tagColor}">${item.tag}</span>` : ''}
+                                </div>
+                                <p class="text-[10px] text-slate-400 font-medium">${item.desc}</p>
+                            </div>
+                        </div>
+                        <p class="text-sm font-black text-slate-800">${item.total.toLocaleString()}</p>
+                    </div>
+                `;
+            });
+            
+            groupHtml += `</div></div>`;
+            return groupHtml;
+        };
+
+        container.innerHTML = 
+            renderGroup('待付款項目', unpaidItems, totalUnpaid, 'unpaid', 'ph-clock-circle', 'text-amber-500', fixedBudgetExpanded.unpaid) +
+            renderGroup('已付清項目', paidItems, totalPaid, 'paid', 'ph-check-circle', 'text-emerald-500', fixedBudgetExpanded.paid);
+    }
+
+    function renderDynamicExpenses() {
+        const container = document.getElementById('dynamic-expense-list');
+        if(dynamicExpenses.length === 0) {
+            container.innerHTML = '<div class="p-5 text-center text-slate-400 text-xs font-medium">目前尚無新增花費。</div>';
+        } else {
+            container.innerHTML = dynamicExpenses.map(exp => `
+                <div class="flex items-center justify-between p-3.5 border-b border-slate-50 last:border-0">
+                    <p class="text-sm font-bold text-slate-700">${exp.name}</p>
+                    <div class="flex items-center gap-3">
+                        <p class="text-sm font-black text-slate-800">${exp.amount.toLocaleString()}</p>
+                        <button onclick="removeExpense(${exp.id})" class="text-slate-300 hover:text-red-500 active:scale-95 transition-transform"><i class="ph-bold ph-trash text-lg"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        updateTotals();
+    }
+
+    function updateTotals() {
+        const totalFixed = fixedBudgetData.reduce((sum, item) => sum + item.total, 0);
+        const totalDynamic = dynamicExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const grandTotal = totalFixed + totalDynamic;
+        
+        document.getElementById('fixed-subtotal-display').innerText = `小計：NT$ ${totalFixed.toLocaleString()}`;
+        document.getElementById('dynamic-subtotal-display').innerText = `動態小計：NT$ ${totalDynamic.toLocaleString()}`;
+        document.getElementById('grand-total-display').innerText = `NT$ ${grandTotal.toLocaleString()}`;
+        document.getElementById('per-person-display').innerText = `NT$ ${Math.round(grandTotal/4).toLocaleString()}`;
+    }
+
+    // 表單事件監聽 (匯率連動)
+    document.getElementById('rate-input').addEventListener('input', (e) => {
+        currentExchangeRate = parseFloat(e.target.value) || 0;
+        const jpy = document.getElementById('jpy-input').value;
+        if(jpy) document.getElementById('expense-amount').value = Math.round(jpy * currentExchangeRate);
+    });
+
+    document.getElementById('jpy-input').addEventListener('input', (e) => {
+        const val = e.target.value;
+        if(val) document.getElementById('expense-amount').value = Math.round(val * currentExchangeRate);
+        else document.getElementById('expense-amount').value = '';
+    });
+
+    document.getElementById('expense-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('expense-name').value;
+        const amount = document.getElementById('expense-amount').value;
+        if(name && amount) {
+            dynamicExpenses.push({ id: Date.now(), name: name, amount: parseInt(amount, 10) });
+            document.getElementById('expense-name').value = '';
+            document.getElementById('expense-amount').value = '';
+            document.getElementById('jpy-input').value = '';
+            renderDynamicExpenses();
+        }
+    });
+
+    function removeExpense(id) {
+        dynamicExpenses = dynamicExpenses.filter(exp => exp.id !== id);
+        renderDynamicExpenses();
+    }
+
+    function renderChecklist(dataArray, containerId, toggleFuncStr) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = dataArray.map((group, cIdx) => `
+            <div>
+                <h3 class="text-xs font-bold text-slate-500 mb-2 ml-1 tracking-wider">${group.category}</h3>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-2 mb-5">
+                    ${group.items.map((item, iIdx) => `
+                        <div onclick="${toggleFuncStr}(${cIdx}, ${iIdx})" class="flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-50 rounded-xl transition active:scale-[0.98]">
+                            ${item.isDone ? '<i class="ph-fill ph-check-circle text-emerald-500 text-2xl shrink-0"></i>' : '<i class="ph ph-circle text-slate-300 text-2xl shrink-0"></i>'}
+                            <span class="text-sm ${item.isDone ? 'text-slate-400 line-through' : 'text-slate-700 font-bold'}">${item.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleChecklistItem(cIdx, iIdx) {
+        checklists[cIdx].items[iIdx].isDone = !checklists[cIdx].items[iIdx].isDone;
+        renderChecklist(checklists, 'checklist-container', 'toggleChecklistItem');
+    }
+
+    function toggleLuggageItem(cIdx, iIdx) {
+        luggages[cIdx].items[iIdx].isDone = !luggages[cIdx].items[iIdx].isDone;
+        renderChecklist(luggages, 'luggage-container', 'toggleLuggageItem');
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => {
+            el.classList.remove('text-red-600', 'text-indigo-600');
+            el.classList.add('text-slate-400');
+            el.querySelector('i').classList.remove('fill-red-50', 'fill-indigo-50');
+        });
+        
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        const activeBtn = document.getElementById(`nav-${tabId}`);
+        const colorClass = 'text-red-600';
+        const fillClass = 'fill-red-50';
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add(colorClass);
+        activeBtn.querySelector('i').classList.add(fillClass);
+    }
+
+    function openVoucher(type) {
+        const modal = document.getElementById('voucher-modal');
+        const content = document.getElementById('voucher-content');
+        
+        let html = '';
+        if (type === 'transfer') {
+            html = `
+            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full">
+              <div class="bg-slate-800 p-6 text-white flex justify-between items-center relative overflow-hidden">
+                <div class="z-10">
+                  <p class="text-slate-300 text-[10px] font-black uppercase tracking-widest mb-1">LEGAO CAR ORDER</p>
+                  <h2 class="text-2xl font-black tracking-wide">樂高專車預約單</h2>
+                </div>
+                <i class="ph-fill ph-car-profile opacity-20 absolute right-2 top-4 z-0 text-6xl"></i>
+              </div>
+              <div class="p-6 bg-slate-50">
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">
+                  <h3 class="text-sm font-black text-slate-800 border-b border-slate-100 pb-2 mb-3 flex items-center gap-2">
+                     <i class="ph-bold ph-clock text-indigo-500"></i> 去程：08/25 (二)
+                  </h3>
+                  <div class="flex justify-between items-center">
+                     <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">上車時間</p><p class="text-2xl font-black text-slate-800">07:30</p></div>
+                     <i class="ph-bold ph-caret-right text-slate-300 text-xl"></i>
+                     <div class="text-right"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">目的地</p><p class="text-base font-bold text-slate-800">桃園機場 T1</p></div>
+                  </div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">
+                  <h3 class="text-sm font-black text-slate-800 border-b border-slate-100 pb-2 mb-3 flex items-center gap-2">
+                     <i class="ph-bold ph-airplane-tilt text-emerald-500"></i> 回程：08/30 (日)
+                  </h3>
+                  <div class="flex justify-between items-center">
+                     <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">航班抵達</p><p class="text-2xl font-black text-slate-800">18:15</p></div>
+                     <i class="ph-bold ph-caret-right text-slate-300 text-xl"></i>
+                     <div class="text-right"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">接機返回</p><p class="text-base font-bold text-slate-800">台中</p></div>
+                  </div>
+                </div>
+                <div class="bg-red-50 rounded-2xl p-5 border border-red-100 mb-5 flex justify-between items-center shadow-inner">
+                   <div><p class="text-[10px] text-red-400 font-bold uppercase tracking-wider">已付訂金</p><p class="text-base font-bold text-slate-600">NT$ 600</p></div>
+                   <div class="text-right"><p class="text-[10px] text-red-500 font-bold uppercase tracking-wider">剩餘尾款 (乘車取付)</p><p class="text-2xl font-black text-red-600">NT$ 3,800</p></div>
+                </div>
+                <a href="https://legao-order.car-tw.com/login.php" target="_blank" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-bold rounded-2xl transition-all flex justify-center items-center gap-2 shadow-lg">
+                  <i class="ph-bold ph-link text-lg"></i> 登入系統查看司機資訊
+                </a>
+              </div>
+            </div>`;
+        } else if (type === 'flight') {
+            html = `
+            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full">
+              <div class="bg-emerald-600 p-6 text-white flex justify-between items-center relative overflow-hidden">
+                <div class="z-10"><p class="text-emerald-100 text-[10px] font-black uppercase tracking-widest mb-1">CATHAY PACIFIC</p><h2 class="text-2xl font-black tracking-wide">國泰航空電子機票</h2></div>
+                <i class="ph-fill ph-airplane-tilt opacity-20 absolute right-2 top-2 z-0 text-7xl"></i>
+              </div>
+              <div class="p-6 bg-slate-50">
+                <div class="flex justify-between items-end border-b border-slate-200 pb-4 mb-4">
+                  <div class="text-center"><h3 class="text-4xl font-black text-slate-800 tracking-tighter">TPE</h3><p class="text-[11px] font-bold text-slate-400 uppercase">台北 (桃園)</p></div>
+                  <div class="flex flex-col items-center px-4 pb-2 w-full"><i class="ph-fill ph-airplane-tilt text-emerald-400 mb-1 text-xl"></i><div class="w-full border-t-2 border-dashed border-slate-300"></div></div>
+                  <div class="text-center"><h3 class="text-4xl font-black text-slate-800 tracking-tighter">KIX</h3><p class="text-[11px] font-bold text-slate-400 uppercase">大阪 (關西)</p></div>
+                </div>
+                <div class="grid grid-cols-2 gap-y-5 gap-x-4 mb-6">
+                  <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">去程航班</p><p class="text-base font-black text-slate-800">CX564</p><p class="text-xs font-bold text-slate-500">08/25 11:05 - 14:55</p></div>
+                  <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">回程航班</p><p class="text-base font-black text-slate-800">CX565</p><p class="text-xs font-bold text-slate-500">08/30 16:15 - 18:15</p></div>
+                  <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">乘客人數</p><p class="text-sm font-black text-slate-800">4 位成人</p></div>
+                  <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">托運行李</p><p class="text-sm font-black text-slate-800">23KG / 人</p></div>
+                </div>
+                <div class="flex justify-center mt-4 pt-6 border-t border-slate-200"><i class="ph-bold ph-qr-code text-slate-800 opacity-90 text-8xl"></i></div>
+              </div>
+            </div>`;
+        } else if (type === 'kyoto_hotel') {
+            html = `
+            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full h-[80vh] flex flex-col">
+              <div class="bg-orange-500 p-6 text-white flex justify-between items-center shrink-0 relative overflow-hidden">
+                <div class="z-10"><p class="text-orange-100 text-[10px] font-black uppercase tracking-widest mb-1">KLOOK / Expedia</p><h2 class="text-2xl font-black tracking-wide">京都訂房確認單</h2></div>
+                <i class="ph-fill ph-bed text-7xl opacity-20 absolute -right-2 -bottom-2 z-0"></i>
+              </div>
+              <div class="p-6 overflow-y-auto flex-1 bg-slate-50">
+                <h3 class="text-xl font-black text-slate-800 leading-tight mb-2">OMO3 京都東寺 by 星野集團</h3>
+                <p class="text-xs font-bold text-slate-400 mb-6">11-6 Nishikujo Zaocho(Minami) ｜ Tel: 81-50-31348095</p>
+                <div class="bg-white rounded-2xl p-5 mb-5 border border-slate-100 shadow-sm text-center">
+                  <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-wider">預訂編號 (Booking Ref)</p><p class="text-3xl font-black text-orange-600 tracking-wider">KRV665588</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-5 border-b border-slate-200 pb-5">
+                  <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">入住 Check-in</p><p class="text-base font-black text-slate-800">08/25 (二)</p><p class="text-[10px] font-bold text-slate-500">15:00 - 00:00</p></div>
+                  <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">退房 Check-out</p><p class="text-base font-black text-slate-800">08/27 (四)</p><p class="text-[10px] font-bold text-slate-500">11:00 前</p></div>
+                </div>
+                <div class="mb-5"><p class="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-wider">房型與床型</p><p class="text-base font-black text-slate-800">雙床房 x 2 間</p><p class="text-xs font-bold text-slate-500">2張加大單人床 / 無早餐</p></div>
+                <div class="bg-slate-100 rounded-xl p-4">
+                  <p class="text-[10px] text-slate-400 uppercase font-bold mb-3 tracking-wider">入住代表</p>
+                  <div class="flex items-center gap-3 mb-2"><i class="ph-fill ph-user text-slate-400 text-lg"></i><p class="text-sm font-black text-slate-700">WU YENJUNG <span class="text-xs text-slate-400 font-bold ml-1">(Room 1)</span></p></div>
+                  <div class="flex items-center gap-3"><i class="ph-fill ph-user text-slate-400 text-lg"></i><p class="text-sm font-black text-slate-700">CHEN WENLI <span class="text-xs text-slate-400 font-bold ml-1">(Room 2)</span></p></div>
+                </div>
+              </div>
+            </div>`;
+        } else if (type === 'osaka_hotel') {
+            html = `
+            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full h-[85vh] flex flex-col">
+              <div class="bg-blue-800 p-6 text-white flex justify-between items-center shrink-0 relative overflow-hidden">
+                <div class="z-10"><p class="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-1">Trip.com</p><h2 class="text-2xl font-black tracking-wide">大阪入住憑證</h2></div>
+                <i class="ph-fill ph-buildings text-7xl opacity-20 absolute -right-2 -bottom-2 z-0"></i>
+              </div>
+              <div class="p-5 overflow-y-auto flex-1 bg-slate-50">
+                <h3 class="text-xl font-black text-slate-800 leading-tight mb-2">The Peak Nipponbashi</h3>
+                <p class="text-xs font-bold text-slate-400 mb-5">1-chōme-10-14 Nipponbashi ｜ Tel: +81-9043017797</p>
+                <div class="flex items-center justify-between bg-white rounded-2xl p-4 mb-5 border border-slate-100 shadow-sm">
+                  <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">入住</p><p class="text-sm font-black text-slate-800">08/27 15:00後</p></div>
+                  <i class="ph-bold ph-arrow-right text-slate-300"></i>
+                  <div class="text-right"><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">退房</p><p class="text-sm font-black text-slate-800">08/30 11:00前</p></div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 mb-4 border border-blue-100 shadow-sm border-l-[6px] border-l-blue-500">
+                  <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-3">
+                    <h4 class="font-black text-blue-800 text-lg">3人房 (A)</h4>
+                    <div class="text-right bg-blue-50 px-3 py-1.5 rounded-lg"><p class="text-[10px] text-blue-400 font-bold uppercase tracking-wider leading-none mb-1">大門 PIN 碼</p><p class="text-2xl font-black text-blue-700 leading-none">7065</p></div>
+                  </div>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-wider">訂單編號</p><p class="text-sm font-black text-slate-700 mb-3 tracking-wider">1616332074840199</p>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-wider">入住名單</p><p class="text-xs font-black text-slate-700">CHEN WEN LI, WU HUNG JUI</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-sm border-l-[6px] border-l-indigo-500">
+                  <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-3">
+                    <h4 class="font-black text-indigo-800 text-lg">3人房 (B)</h4>
+                    <div class="text-right bg-indigo-50 px-3 py-1.5 rounded-lg"><p class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider leading-none mb-1">大門 PIN 碼</p><p class="text-2xl font-black text-indigo-700 leading-none">1907</p></div>
+                  </div>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-wider">訂單編號</p><p class="text-sm font-black text-slate-700 mb-3 tracking-wider">1616332074840204</p>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase mb-1 tracking-wider">入住名單</p><p class="text-xs font-black text-slate-700">WU YEN JUNG, LIU YU CHENG</p>
+                </div>
+              </div>
+            </div>`;
+        } else if (activeVoucher === 'haruka') {
+            html = `
+            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-sm mx-4 transform transition-all">
+              <div class="bg-cyan-700 p-6 text-white flex justify-between items-center relative overflow-hidden">
+                <div class="z-10"><p class="text-cyan-100 text-[10px] font-black uppercase tracking-widest mb-1">JR WEST</p><h2 class="text-2xl font-black tracking-wide">Haruka 特急兌換券</h2></div>
+                <i class="ph-fill ph-train text-7xl opacity-20 absolute -right-2 top-2 z-0"></i>
+              </div>
+              <div class="p-6 bg-slate-50 text-center">
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                   <div class="text-left"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">起點</p><p class="text-lg font-black text-slate-800">關西機場</p></div>
+                   <i class="ph-bold ph-arrow-right text-slate-300 text-xl"></i>
+                   <div class="text-right"><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">終點</p><p class="text-lg font-black text-slate-800">京都車站</p></div>
+                </div>
+                <i class="ph-bold ph-qr-code text-slate-800 opacity-90 text-9xl mb-5 inline-block"></i>
+                <div class="bg-cyan-50 p-4 rounded-xl text-left border border-cyan-100">
+                    <p class="text-xs font-bold text-cyan-800 leading-relaxed flex items-start gap-2">
+                        <i class="ph-fill ph-lightbulb text-lg shrink-0"></i> 憑此 QR Code 與護照，至關西機場 JR 綠色售票機或人工櫃檯兌換實體劃位車票。
+                    </p>
+                </div>
+              </div>
+            </div>`;
+        }
+
+        content.innerHTML = html;
+        modal.classList.add('active');
+    }
+
+    function closeVoucher() {
+        document.getElementById('voucher-modal').classList.remove('active');
+    }
+
+    // --- 初始化執行 ---
+    window.onload = () => {
+        renderDaySelector();
+        renderItinerary();
+        renderFixedBudget();
+        renderDynamicExpenses();
+        renderChecklist(checklists, 'checklist-container', 'toggleChecklistItem');
+        renderChecklist(luggages, 'luggage-container', 'toggleLuggageItem');
+    };
+</script>
+
+</body>
+</html>
