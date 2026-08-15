@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="京阪旅遊記">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#e2e8f0">
+    <meta name="theme-color" content="#dc2626">
     <title>京阪雙城深度旅遊記</title>
     
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iI2RjMjYyNiIvPjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9IjYwIiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4NiIgcj0iMTAiIGZpbGw9IiMwMDAiLz48Y2lyY2xlIGN4PSIxMTYiIGN5PSI4NiIgcj0iMTAiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNOTYgMTEwIEMxMTAgMTEwLDExMCAxMzAsOTYgMTMwIEM4MiAxMzAsODIgMTEwLDk2IDExMCBaIiBmaWxsPSIjZGMyNjI2Ii8+PC9zdmc+">
@@ -36,214 +36,207 @@
         .tab-content.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* 彈窗限制在 App 框架內，不再覆蓋整個螢幕 */
+        /* 彈窗限制在 App 框架內，防擋設計 */
         #voucher-modal { display: none; flex-direction: column; }
         #voucher-modal.active { display: flex; animation: fadeInModal 0.2s ease-out forwards; }
         @keyframes fadeInModal { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(4px); } }
         
-        /* 新增：讓 Day 按鈕容器可以自動換行，避免需要橫向捲動 */
         #day-selector {
             flex-wrap: wrap; 
-            justify-content: center; /* 置中對齊會比較好看 */
+            justify-content: center;
         }
     </style>
 </head>
 
-<!-- 背景改為淺灰，確保跟 App 框架有對比。加上嚴謹的安全距離 (Safe Area) 與 Padding，保證不被手機時間與頂部狀態列蓋住 -->
-<body class="bg-slate-300 flex justify-center items-center h-[100dvh] overflow-hidden sm:p-8" style="padding-top: max(56px, env(safe-area-inset-top)); padding-bottom: max(32px, env(safe-area-inset-bottom)); padding-left: 12px; padding-right: 12px;">
+<body class="flex justify-center items-center h-[100dvh] overflow-hidden sm:p-8 relative" style="padding-top: max(56px, env(safe-area-inset-top)); padding-bottom: max(32px, env(safe-area-inset-bottom)); padding-left: 12px; padding-right: 12px; background-color: #dc2626;">
 
-<!-- App 框架容器：上下左右預留空間，圓角，類似真實手機外觀，防擋防誤觸。移除寫死的高度，讓它自適應安全邊距 -->
-<div class="w-full h-full max-w-[420px] bg-slate-50 flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border-[4px] sm:border-[6px] border-white">
+    <!-- 網頁底層背景：達摩圖案 -->
+    <svg class="fixed inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-[-1]" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="bg-daruma-pattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+            <path d="M40 15 C 60 15, 65 35, 65 55 C 65 75, 50 75, 40 75 C 30 75, 15 75, 15 55 C 15 35, 20 15, 40 15 Z" fill="#fff" stroke="#450a0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <ellipse cx="40" cy="45" rx="16" ry="14" fill="#ffe4e6" stroke="#450a0a" stroke-width="1.5"/>
+            <circle cx="34" cy="43" r="2.5" fill="#450a0a"/>
+            <circle cx="46" cy="43" r="2.5" fill="#450a0a"/>
+            <path d="M29 38 Q 34 35 37 39 M43 39 Q 46 35 51 38" stroke="#450a0a" fill="none" stroke-width="2" stroke-linecap="round"/>
+            <path d="M35 52 Q 40 55 45 52" stroke="#450a0a" fill="none" stroke-width="2" stroke-linecap="round"/>
+            <path d="M30 62 Q 40 70 50 62" stroke="#450a0a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M35 66 L 45 66" stroke="#450a0a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+          </pattern>
+        </defs>
+        <rect x="0" y="0" width="100%" height="100%" fill="url(#bg-daruma-pattern)" />
+    </svg>
 
-    <!-- 憑證彈窗 Modal (Absolute 絕對定位於 App 內，X按鈕保證按得到) -->
-    <div id="voucher-modal" class="absolute inset-0 z-[60] items-center justify-center p-5 bg-slate-900/80">
-        <button onclick="closeVoucher()" class="absolute top-5 right-5 p-2.5 bg-white/20 hover:bg-white/30 rounded-full text-white backdrop-blur-md transition-colors z-50 shadow-lg">
-            <i class="ph-bold ph-x text-lg"></i>
-        </button>
-        <div id="voucher-content" class="w-full max-w-sm max-h-[85%] flex flex-col"></div>
-    </div>
+    <!-- App 框架容器：高級半透明磨砂玻璃效果 -->
+    <div class="w-full h-full max-w-[420px] bg-white/70 backdrop-blur-2xl flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border-[2px] sm:border-[3px] border-white/60">
 
-    <!-- 頂部 Header -->
-    <header class="relative px-5 pt-8 pb-5 shadow-md z-10 overflow-hidden bg-red-600 shrink-0">
-        <svg class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none" style="background-color: #dc2626" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="daruma-pattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-                <path d="M40 15 C 60 15, 65 35, 65 55 C 65 75, 50 75, 40 75 C 30 75, 15 75, 15 55 C 15 35, 20 15, 40 15 Z" fill="#fff" stroke="#450a0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <ellipse cx="40" cy="45" rx="16" ry="14" fill="#ffe4e6" stroke="#450a0a" stroke-width="1.5"/>
-                <circle cx="34" cy="43" r="2.5" fill="#450a0a"/>
-                <circle cx="46" cy="43" r="2.5" fill="#450a0a"/>
-                <path d="M29 38 Q 34 35 37 39 M43 39 Q 46 35 51 38" stroke="#450a0a" fill="none" stroke-width="2" stroke-linecap="round"/>
-                <path d="M35 52 Q 40 55 45 52" stroke="#450a0a" fill="none" stroke-width="2" stroke-linecap="round"/>
-                <path d="M30 62 Q 40 70 50 62" stroke="#450a0a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M35 66 L 45 66" stroke="#450a0a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
-              </pattern>
-            </defs>
-            <rect x="0" y="0" width="100%" height="100%" fill="url(#daruma-pattern)" />
-        </svg>
-        <div class="relative z-10">
-            <h1 class="text-2xl font-black text-white tracking-wide drop-shadow-md">京阪雙城深度旅遊記</h1>
-            <p class="text-sm text-red-100 mt-0.5 drop-shadow-sm font-medium">關西 6天5夜 黃金動線與預算</p>
-        </div>
-    </header>
-
-    <main class="flex-1 overflow-y-auto overflow-x-hidden pb-24 relative bg-slate-50">
-
-        <!-- Tab 1: 每日行程 -->
-        <div id="tab-itinerary" class="tab-content active">
-            <!-- 移除 overflow-x-auto 和 no-scrollbar，改用 flex-wrap -->
-            <div id="day-selector" class="flex gap-2 px-3 py-3 bg-slate-50 sticky top-0 z-10 shadow-sm border-b border-slate-100"></div>
-            <div id="itinerary-list" class="p-4 space-y-4"></div>
+        <!-- 憑證彈窗 Modal -->
+        <div id="voucher-modal" class="absolute inset-0 z-[60] items-center justify-center p-5 bg-slate-900/80">
+            <button onclick="closeVoucher()" class="absolute top-5 right-5 p-2.5 bg-white/20 hover:bg-white/30 rounded-full text-white backdrop-blur-md transition-colors z-50 shadow-lg">
+                <i class="ph-bold ph-x text-lg"></i>
+            </button>
+            <div id="voucher-content" class="w-full max-w-sm max-h-[85%] flex flex-col"></div>
         </div>
 
-        <!-- Tab 2: 預算記帳 -->
-        <div id="tab-budget" class="tab-content">
-            <div class="p-4 space-y-6">
-                <!-- 總花費卡片 -->
-                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-5 text-white shadow-lg relative overflow-hidden">
-                    <div class="absolute -right-2 -top-2 opacity-10"><i class="ph-fill ph-calculator text-9xl"></i></div>
-                    <p class="text-slate-300 text-sm font-medium mb-1">總花費累計 (4人)</p>
-                    <h2 class="text-4xl font-black tracking-tight" id="grand-total-display">NT$ 0</h2>
-                    <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
-                        <span class="text-slate-300 text-xs">單人平均</span>
-                        <span class="text-xl font-bold text-emerald-400" id="per-person-display">NT$ 0</span>
-                    </div>
-                </div>
+        <!-- 頂部 Header -->
+        <header class="relative px-5 pt-8 pb-5 shadow-sm z-10 overflow-hidden bg-red-600 shrink-0 border-b border-red-700/50">
+            <svg class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="0" width="100%" height="100%" fill="url(#bg-daruma-pattern)" />
+            </svg>
+            <div class="relative z-10">
+                <h1 class="text-2xl font-black text-white tracking-wide drop-shadow-md">京阪雙城深度旅遊記</h1>
+                <p class="text-sm text-red-100 mt-0.5 drop-shadow-sm font-medium">關西 6天5夜 黃金動線與預算</p>
+            </div>
+        </header>
 
-                <!-- 固定支出清單 (折疊式) -->
-                <div>
-                    <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1"><i class="ph-fill ph-lock-key text-slate-400"></i> 已知固定支出 (點擊可收折)</h3>
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div id="fixed-budget-list"></div>
-                        <div class="p-3 bg-slate-50 text-right border-t border-slate-100">
-                            <span class="text-xs text-slate-500 font-bold" id="fixed-subtotal-display">小計：NT$ 0</span>
+        <main class="flex-1 overflow-y-auto overflow-x-hidden pb-24 relative bg-transparent">
+
+            <!-- Tab 1: 每日行程 -->
+            <div id="tab-itinerary" class="tab-content active">
+                <div id="day-selector" class="flex gap-2 px-3 py-3 bg-white/50 backdrop-blur-md sticky top-0 z-10 shadow-sm border-b border-white/50"></div>
+                <div id="itinerary-list" class="p-4 space-y-4"></div>
+            </div>
+
+            <!-- Tab 2: 預算記帳 -->
+            <div id="tab-budget" class="tab-content">
+                <div class="p-4 space-y-6">
+                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-5 text-white shadow-lg relative overflow-hidden border border-slate-700">
+                        <div class="absolute -right-2 -top-2 opacity-10"><i class="ph-fill ph-calculator text-9xl"></i></div>
+                        <p class="text-slate-300 text-sm font-medium mb-1">總花費累計 (4人)</p>
+                        <h2 class="text-4xl font-black tracking-tight" id="grand-total-display">NT$ 0</h2>
+                        <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
+                            <span class="text-slate-300 text-xs">單人平均</span>
+                            <span class="text-xl font-bold text-emerald-400" id="per-person-display">NT$ 0</span>
                         </div>
                     </div>
-                </div>
 
-                <!-- 動態記帳區 -->
-                <div>
-                    <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1">
-                        <i class="ph-fill ph-coins text-amber-500"></i> 即時匯率與旅途記帳
-                    </h3>
-                    
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
-                        <div class="flex items-center gap-2 mb-3 border-b border-slate-100 pb-3">
-                            <div class="flex-1">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">日幣 (JPY)</label>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <span class="text-slate-400 font-bold text-lg">¥</span>
-                                    <input type="number" id="jpy-input" class="w-full bg-slate-50 text-base font-bold text-slate-800 rounded-lg px-2 py-1.5 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors" placeholder="輸入金額">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1"><i class="ph-fill ph-lock-key text-slate-500"></i> 已知固定支出 (點擊可收折)</h3>
+                        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-white overflow-hidden">
+                            <div id="fixed-budget-list"></div>
+                            <div class="p-3 bg-slate-50/80 text-right border-t border-white">
+                                <span class="text-xs text-slate-500 font-bold" id="fixed-subtotal-display">小計：NT$ 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1">
+                            <i class="ph-fill ph-coins text-amber-500"></i> 即時匯率與旅途記帳
+                        </h3>
+                        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-white p-4 mb-4">
+                            <div class="flex items-center gap-2 mb-3 border-b border-slate-100 pb-3">
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">日幣 (JPY)</label>
+                                    <div class="flex items-center gap-1 mt-1">
+                                        <span class="text-slate-400 font-bold text-lg">¥</span>
+                                        <input type="number" id="jpy-input" class="w-full bg-slate-50/80 text-base font-bold text-slate-800 rounded-lg px-2 py-1.5 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors" placeholder="輸入金額">
+                                    </div>
+                                </div>
+                                <i class="ph-bold ph-arrows-left-right text-slate-300 mt-5"></i>
+                                <div class="w-20 shrink-0">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">匯率</label>
+                                    <input type="number" id="rate-input" step="0.001" value="0.21" class="w-full bg-slate-50/80 text-base font-bold text-slate-800 rounded-lg px-2 py-1.5 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors mt-1 text-center">
                                 </div>
                             </div>
-                            <i class="ph-bold ph-arrows-left-right text-slate-300 mt-5"></i>
-                            <div class="w-20 shrink-0">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">匯率</label>
-                                <input type="number" id="rate-input" step="0.001" value="0.21" class="w-full bg-slate-50 text-base font-bold text-slate-800 rounded-lg px-2 py-1.5 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors mt-1 text-center">
-                            </div>
+
+                            <form id="expense-form" class="flex gap-2 items-end">
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">消費項目</label>
+                                    <input type="text" id="expense-name" placeholder="如: 晚餐/藥妝" required class="w-full bg-slate-50/80 text-sm font-medium rounded-lg px-3 py-2 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors mt-1">
+                                </div>
+                                <div class="w-24 shrink-0">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">台幣 (TWD)</label>
+                                    <input type="number" id="expense-amount" placeholder="自動換算" required class="w-full bg-red-50/80 text-sm font-bold text-red-600 rounded-lg px-3 py-2 border border-red-200 focus:outline-none focus:border-red-500 transition-colors mt-1">
+                                </div>
+                                <button type="submit" class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 active:scale-95 transition-all shrink-0 h-[38px] shadow-sm">
+                                    <i class="ph-bold ph-plus text-lg"></i>
+                                </button>
+                            </form>
                         </div>
 
-                        <form id="expense-form" class="flex gap-2 items-end">
-                            <div class="flex-1">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">消費項目</label>
-                                <input type="text" id="expense-name" placeholder="如: 晚餐/藥妝" required class="w-full bg-slate-50 text-sm font-medium rounded-lg px-3 py-2 border border-slate-200 focus:outline-none focus:border-red-500 transition-colors mt-1">
+                        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-white overflow-hidden min-h-[100px]">
+                            <div id="dynamic-expense-list"></div>
+                            <div class="p-3 bg-red-50/80 text-right border-t border-red-100/50">
+                                <span class="text-xs text-red-600 font-black tracking-wide" id="dynamic-subtotal-display">動態小計：NT$ 0</span>
                             </div>
-                            <div class="w-24 shrink-0">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">台幣 (TWD)</label>
-                                <input type="number" id="expense-amount" placeholder="自動換算" required class="w-full bg-red-50 text-sm font-bold text-red-600 rounded-lg px-3 py-2 border border-red-200 focus:outline-none focus:border-red-500 transition-colors mt-1">
-                            </div>
-                            <button type="submit" class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 active:scale-95 transition-all shrink-0 h-[38px]">
-                                <i class="ph-bold ph-plus text-lg"></i>
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[100px]">
-                        <div id="dynamic-expense-list"></div>
-                        <div class="p-3 bg-red-50 text-right border-t border-red-100">
-                            <span class="text-xs text-red-600 font-black tracking-wide" id="dynamic-subtotal-display">動態小計：NT$ 0</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Tab 3: 專屬地圖 (直接連結 Google Maps) -->
-        <div id="tab-maps" class="tab-content h-full">
-            <div class="p-5 flex flex-col items-center justify-center h-full pb-20">
-                <!-- 專屬景點導航卡片 -->
-                <div class="w-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[2rem] p-8 shadow-2xl text-white flex flex-col items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.02]">
-                    <!-- 背景裝飾圖示 -->
-                    <i class="ph-fill ph-map-trifold absolute -right-8 -bottom-8 text-[12rem] opacity-10"></i>
-                    <i class="ph-fill ph-navigation-arrow absolute top-6 right-8 text-4xl opacity-20"></i>
-                    
-                    <!-- 內容 -->
-                    <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-inner relative z-10 border border-white/30">
-                        <i class="ph-fill ph-google-logo text-4xl text-white"></i>
+            <!-- Tab 3: 專屬地圖 (直接連結 Google Maps) -->
+            <div id="tab-maps" class="tab-content h-full">
+                <div class="p-5 flex flex-col items-center justify-center h-full pb-20">
+                    <div class="w-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[2rem] p-8 shadow-xl text-white flex flex-col items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.02] border border-white/20">
+                        <i class="ph-fill ph-map-trifold absolute -right-8 -bottom-8 text-[12rem] opacity-10"></i>
+                        <i class="ph-fill ph-navigation-arrow absolute top-6 right-8 text-4xl opacity-20"></i>
+                        
+                        <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-inner relative z-10 border border-white/30">
+                            <i class="ph-fill ph-google-logo text-4xl text-white"></i>
+                        </div>
+                        
+                        <h2 class="text-2xl font-black tracking-wide mb-2 relative z-10 text-center">專屬行程儲存地標</h2>
+                        <p class="text-sm text-blue-100 text-center mb-8 relative z-10 font-medium px-4 leading-relaxed">
+                            已為您整理好本次旅行的<br/>完整 Google Maps 清單
+                        </p>
+                        
+                        <a href="https://maps.app.goo.gl/TNxogxAoDMAGPNM76" target="_blank" class="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 text-base font-black rounded-2xl transition-all flex justify-center items-center gap-2 shadow-lg active:scale-95 relative z-10">
+                            <i class="ph-bold ph-arrow-square-out text-xl"></i> 立即打開 Google Maps
+                        </a>
                     </div>
                     
-                    <h2 class="text-2xl font-black tracking-wide mb-2 relative z-10 text-center">專屬行程儲存地標</h2>
-                    <p class="text-sm text-blue-100 text-center mb-8 relative z-10 font-medium px-4 leading-relaxed">
-                        已為您整理好本次旅行的<br/>完整 Google Maps 清單
+                    <p class="text-xs text-slate-500 mt-6 flex items-center gap-1.5 font-medium bg-white/50 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/50">
+                        <i class="ph-fill ph-info text-slate-400"></i> 點擊將直接喚醒手機內建的地圖 App
                     </p>
-                    
-                    <!-- 連結按鈕 -->
-                    <a href="https://maps.app.goo.gl/TNxogxAoDMAGPNM76" target="_blank" class="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 text-base font-black rounded-2xl transition-all flex justify-center items-center gap-2 shadow-lg active:scale-95 relative z-10">
-                        <i class="ph-bold ph-arrow-square-out text-xl"></i> 立即打開 Google Maps
-                    </a>
                 </div>
-                
-                <!-- 溫馨提示 -->
-                <p class="text-xs text-slate-400 mt-6 flex items-center gap-1.5 font-medium">
-                    <i class="ph-fill ph-info text-slate-300"></i> 點擊將直接喚醒手機內建的地圖 App
-                </p>
             </div>
-        </div>
 
-        <!-- Tab 4: 行前確認 -->
-        <div id="tab-checklist" class="tab-content">
-            <div class="p-4 space-y-6">
-                <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2"><i class="ph-fill ph-check-square-offset text-red-600 text-xl"></i> 行前最終確認清單</h2>
-                <div id="checklist-container"></div>
+            <!-- Tab 4: 行前確認 -->
+            <div id="tab-checklist" class="tab-content">
+                <div class="p-4 space-y-6">
+                    <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2"><i class="ph-fill ph-check-square-offset text-red-600 text-xl"></i> 行前最終確認清單</h2>
+                    <div id="checklist-container"></div>
+                </div>
             </div>
-        </div>
 
-        <!-- Tab 5: 行李清單 -->
-        <div id="tab-luggage" class="tab-content">
-            <div class="p-4 space-y-6">
-                <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2"><i class="ph-fill ph-suitcase text-red-600 text-xl"></i> 行李打包清單</h2>
-                <div id="luggage-container"></div>
+            <!-- Tab 5: 行李清單 -->
+            <div id="tab-luggage" class="tab-content">
+                <div class="p-4 space-y-6">
+                    <h2 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2"><i class="ph-fill ph-suitcase text-red-600 text-xl"></i> 行李打包清單</h2>
+                    <div id="luggage-container"></div>
+                </div>
             </div>
-        </div>
 
-    </main>
+        </main>
 
-    <!-- 底部 5 個導覽按鈕 (加厚底部留白防誤觸) -->
-    <nav class="bg-white border-t border-slate-200 flex justify-around items-center pt-2 pb-4 absolute bottom-0 w-full h-[72px] shadow-[0_-10px_20px_rgba(0,0,0,0.04)] z-20">
-        <button onclick="switchTab('itinerary')" id="nav-itinerary" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-red-600 active:scale-95">
-            <i class="ph-fill ph-calendar-blank text-xl"></i>
-            <span class="text-[10px] font-bold">行程</span>
-        </button>
-        <button onclick="switchTab('budget')" id="nav-budget" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
-            <i class="ph-fill ph-wallet text-xl"></i>
-            <span class="text-[10px] font-bold">記帳</span>
-        </button>
-        <button onclick="switchTab('maps')" id="nav-maps" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
-            <i class="ph-fill ph-map-trifold text-xl"></i>
-            <span class="text-[10px] font-bold">地圖</span>
-        </button>
-        <button onclick="switchTab('checklist')" id="nav-checklist" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
-            <i class="ph-fill ph-check-square text-xl"></i>
-            <span class="text-[10px] font-bold">確認</span>
-        </button>
-        <button onclick="switchTab('luggage')" id="nav-luggage" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
-            <i class="ph-fill ph-suitcase text-xl"></i>
-            <span class="text-[10px] font-bold">行李</span>
-        </button>
-    </nav>
-</div>
+        <!-- 底部 5 個導覽按鈕 (高級玻璃效果) -->
+        <nav class="bg-white/80 backdrop-blur-xl border-t border-white/60 flex justify-around items-center pt-2 pb-4 absolute bottom-0 w-full h-[72px] shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-20">
+            <button onclick="switchTab('itinerary')" id="nav-itinerary" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-red-600 active:scale-95">
+                <i class="ph-fill ph-calendar-blank text-xl"></i>
+                <span class="text-[10px] font-bold">行程</span>
+            </button>
+            <button onclick="switchTab('budget')" id="nav-budget" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
+                <i class="ph-fill ph-wallet text-xl"></i>
+                <span class="text-[10px] font-bold">記帳</span>
+            </button>
+            <button onclick="switchTab('maps')" id="nav-maps" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
+                <i class="ph-fill ph-map-trifold text-xl"></i>
+                <span class="text-[10px] font-bold">地圖</span>
+            </button>
+            <button onclick="switchTab('checklist')" id="nav-checklist" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
+                <i class="ph-fill ph-check-square text-xl"></i>
+                <span class="text-[10px] font-bold">確認</span>
+            </button>
+            <button onclick="switchTab('luggage')" id="nav-luggage" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
+                <i class="ph-fill ph-suitcase text-xl"></i>
+                <span class="text-[10px] font-bold">行李</span>
+            </button>
+        </nav>
+    </div>
 
 <script>
-    // --- 資料區 (包含精準色系、小圖示) ---
+    // --- 核心資料區 ---
     const itineraryData = [
       {
         day: "Day 1", date: "8/25 (二)",
@@ -422,16 +415,13 @@
     let currentExchangeRate = 0.21;
     let currentDayIndex = 0; // 預設跳到 Day 1
     let fixedBudgetExpanded = { paid: false, unpaid: true }; // 預設打開待付款，收起已付清
-    let mapScaleVal = 1;
-    let currentMapIndex = 0;
 
     function renderDaySelector() {
         const container = document.getElementById('day-selector');
-        // 稍微縮小按鈕的 padding 和字體，並設定 flex-1 讓它們平分寬度
         container.innerHTML = itineraryData.map((d, idx) => `
-            <button onclick="setDay(${idx})" class="flex-1 flex flex-col items-center py-2 px-1 rounded-xl transition-all ${currentDayIndex === idx ? 'bg-red-600 text-white shadow-md scale-105' : 'bg-white text-slate-500 border border-slate-200'}">
+            <button onclick="setDay(${idx})" class="flex-1 flex flex-col items-center py-2 px-1 rounded-xl transition-all ${currentDayIndex === idx ? 'bg-red-600 text-white shadow-md scale-105' : 'bg-white/50 text-slate-600 border border-white/60'}">
                 <span class="text-[11px] font-bold mb-0.5 whitespace-nowrap">${d.day}</span>
-                <span class="text-[9px] ${currentDayIndex === idx ? 'text-red-100' : 'text-slate-400'} whitespace-nowrap">${d.date}</span>
+                <span class="text-[9px] ${currentDayIndex === idx ? 'text-red-100' : 'text-slate-500'} whitespace-nowrap">${d.date}</span>
             </button>
         `).join('');
     }
@@ -442,14 +432,13 @@
         
         container.innerHTML = events.map(ev => {
             let titleIcon = ev.icon ? `<i class="ph-fill ${ev.icon} ${ev.iconColor} mr-1.5 text-lg"></i>` : '';
-            
             let mapLink = ev.mapQuery ? `
                 <a href="https://www.google.com/maps/search/?api=1&query=${ev.mapQuery}" target="_blank" class="text-blue-500 bg-blue-50 p-2 rounded-full hover:bg-blue-100 transition-colors shrink-0 ml-auto active:scale-95 shadow-sm">
                     <i class="ph-bold ph-arrow-square-out text-base"></i>
                 </a>` : '';
                 
             let voucherBtn = ev.voucherType ? `
-                <div class="mt-3 pl-2 pr-2 border-t border-slate-50 pt-3">
+                <div class="mt-3 pl-2 pr-2 border-t border-slate-100 pt-3">
                     <button onclick="openVoucher('${ev.voucherType}')" class="w-full py-3 text-white text-sm font-bold rounded-xl transition-colors flex justify-center items-center gap-2 shadow-md active:scale-95 ${ev.voucherType === 'transfer' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-800 hover:bg-slate-700'}">
                         <i class="ph-fill ph-ticket text-lg"></i> 查看憑證卡
                     </button>
@@ -481,10 +470,10 @@
             }
 
             return `
-                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 relative overflow-hidden">
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-white relative overflow-hidden">
                     <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500 rounded-l-2xl"></div>
                     <div class="flex justify-between items-start mb-2 pl-2">
-                        <span class="bg-slate-100 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5">
+                        <span class="bg-white/80 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-slate-100">
                             <i class="ph-bold ph-clock"></i> ${ev.time}
                         </span>
                         <span class="text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 ${transportColor}">
@@ -525,7 +514,7 @@
             if(items.length === 0) return '';
             let groupHtml = `
             <div class="border-b border-slate-100 last:border-0 overflow-hidden">
-                <div onclick="toggleFixedGroup('${groupId}')" class="flex items-center justify-between p-3.5 bg-slate-50 cursor-pointer hover:bg-slate-100 active:bg-slate-200 transition-colors">
+                <div onclick="toggleFixedGroup('${groupId}')" class="flex items-center justify-between p-3.5 bg-slate-50/80 cursor-pointer hover:bg-slate-100 active:bg-slate-200 transition-colors">
                     <div class="flex items-center gap-2">
                         <i class="ph-fill ${icon} ${colorClass} text-lg"></i>
                         <span class="text-sm font-bold text-slate-700">${title}</span>
@@ -536,12 +525,12 @@
                         <i class="ph-bold ph-caret-${isExpanded ? 'up' : 'down'} text-slate-400 transition-transform"></i>
                     </div>
                 </div>
-                <div class="${isExpanded ? 'block' : 'hidden'} bg-white">
+                <div class="${isExpanded ? 'block' : 'hidden'} bg-white/50">
             `;
             
             items.forEach(item => {
                 groupHtml += `
-                    <div class="flex items-center justify-between p-3.5 border-t border-slate-50 last:border-0 ml-2 mr-2">
+                    <div class="flex items-center justify-between p-3.5 border-t border-slate-100/50 last:border-0 ml-2 mr-2">
                         <div class="flex items-center gap-3">
                             <div class="p-2.5 rounded-xl ${item.bg} ${item.color}"><i class="${item.icon} text-lg"></i></div>
                             <div>
@@ -549,7 +538,7 @@
                                     <p class="text-sm font-bold text-slate-800 leading-none">${item.title}</p>
                                     ${item.tag ? `<span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold ${item.tagColor}">${item.tag}</span>` : ''}
                                 </div>
-                                <p class="text-[10px] text-slate-400 font-medium">${item.desc}</p>
+                                <p class="text-[10px] text-slate-500 font-medium">${item.desc}</p>
                             </div>
                         </div>
                         <p class="text-sm font-black text-slate-800">${item.total.toLocaleString()}</p>
@@ -572,7 +561,7 @@
             container.innerHTML = '<div class="p-5 text-center text-slate-400 text-xs font-medium">目前尚無新增花費。</div>';
         } else {
             container.innerHTML = dynamicExpenses.map(exp => `
-                <div class="flex items-center justify-between p-3.5 border-b border-slate-50 last:border-0">
+                <div class="flex items-center justify-between p-3.5 border-b border-slate-100/50 last:border-0">
                     <p class="text-sm font-bold text-slate-700">${exp.name}</p>
                     <div class="flex items-center gap-3">
                         <p class="text-sm font-black text-slate-800">${exp.amount.toLocaleString()}</p>
@@ -629,10 +618,10 @@
         const container = document.getElementById(containerId);
         container.innerHTML = dataArray.map((group, cIdx) => `
             <div>
-                <h3 class="text-xs font-bold text-slate-500 mb-2 ml-1 tracking-wider">${group.category}</h3>
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-2 mb-5">
+                <h3 class="text-xs font-bold text-slate-600 mb-2 ml-1 tracking-wider drop-shadow-sm">${group.category}</h3>
+                <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-white p-2 mb-5">
                     ${group.items.map((item, iIdx) => `
-                        <div onclick="${toggleFuncStr}(${cIdx}, ${iIdx})" class="flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-50 rounded-xl transition active:scale-[0.98]">
+                        <div onclick="${toggleFuncStr}(${cIdx}, ${iIdx})" class="flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-50/50 rounded-xl transition active:scale-[0.98]">
                             ${item.isDone ? '<i class="ph-fill ph-check-circle text-emerald-500 text-2xl shrink-0"></i>' : '<i class="ph ph-circle text-slate-300 text-2xl shrink-0"></i>'}
                             <span class="text-sm ${item.isDone ? 'text-slate-400 line-through' : 'text-slate-700 font-bold'}">${item.name}</span>
                         </div>
@@ -650,26 +639,6 @@
     function toggleLuggageItem(cIdx, iIdx) {
         luggages[cIdx].items[iIdx].isDone = !luggages[cIdx].items[iIdx].isDone;
         renderChecklist(luggages, 'luggage-container', 'toggleLuggageItem');
-    }
-
-    function switchMap(index) {
-        currentMapIndex = index;
-        mapScaleVal = 1;
-        document.getElementById('railway-map-img').src = MAP_URLS[index];
-        document.getElementById('railway-map-img').style.transform = `scale(${mapScaleVal})`;
-        
-        document.getElementById('map-btn-0').className = `flex-1 py-2 text-sm font-bold rounded-xl transition-colors ${index === 0 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500'}`;
-        document.getElementById('map-btn-1').className = `flex-1 py-2 text-sm font-bold rounded-xl transition-colors ${index === 1 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500'}`;
-    }
-
-    function zoomMap(delta) {
-        mapScaleVal = Math.max(0.5, Math.min(mapScaleVal + delta, 4));
-        document.getElementById('railway-map-img').style.transform = `scale(${mapScaleVal})`;
-    }
-
-    function resetMapZoom() {
-        mapScaleVal = 1;
-        document.getElementById('railway-map-img').style.transform = `scale(${mapScaleVal})`;
     }
 
     function switchTab(tabId) {
