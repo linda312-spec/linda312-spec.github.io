@@ -5,7 +5,7 @@
     <!-- PWA App Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="京阪旅遊記">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#e2e8f0">
@@ -49,11 +49,11 @@
     </style>
 </head>
 
-<!-- 背景改為淺灰，確保跟 App 框架有對比。使用 dVH 讓手機瀏覽器高度精準 -->
-<body class="bg-slate-300 flex justify-center items-center h-[100dvh] overflow-hidden p-3 sm:p-6">
+<!-- 背景改為淺灰，確保跟 App 框架有對比。加上嚴謹的安全距離 (Safe Area) 與 Padding，保證不被手機時間與頂部狀態列蓋住 -->
+<body class="bg-slate-300 flex justify-center items-center h-[100dvh] overflow-hidden sm:p-8" style="padding-top: max(56px, env(safe-area-inset-top)); padding-bottom: max(32px, env(safe-area-inset-bottom)); padding-left: 12px; padding-right: 12px;">
 
-<!-- App 框架容器：上下左右預留空間，圓角，類似真實手機外觀，防擋防誤觸 -->
-<div class="w-full h-full max-h-[92dvh] max-w-[420px] bg-slate-50 flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] overflow-hidden rounded-[2.5rem] border-[6px] border-white">
+<!-- App 框架容器：上下左右預留空間，圓角，類似真實手機外觀，防擋防誤觸。移除寫死的高度，讓它自適應安全邊距 -->
+<div class="w-full h-full max-w-[420px] bg-slate-50 flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border-[4px] sm:border-[6px] border-white">
 
     <!-- 憑證彈窗 Modal (Absolute 絕對定位於 App 內，X按鈕保證按得到) -->
     <div id="voucher-modal" class="absolute inset-0 z-[60] items-center justify-center p-5 bg-slate-900/80">
