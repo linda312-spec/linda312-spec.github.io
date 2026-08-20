@@ -662,6 +662,9 @@
         currentDayIndex = index;
         renderDaySelector();
         renderItinerary();
+        // 讓行程清單滾動容器瞬間回到最頂端
+        const mainContainer = document.querySelector('main');
+        if (mainContainer) mainContainer.scrollTop = 0;
     }
 
     function toggleRouteStops(id) {
