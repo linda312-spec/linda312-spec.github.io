@@ -67,8 +67,8 @@
         <rect x="0" y="0" width="100%" height="100%" fill="url(#bg-daruma-pattern)" />
     </svg>
 
-    <!-- App 框架容器：玻璃邊框效果，內部純白 -->
-    <div class="w-full h-full max-w-[420px] bg-white/80 backdrop-blur-xl flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border-[2px] sm:border-[3px] border-white/60">
+    <!-- App 框架容器 -->
+    <div class="w-full h-full max-w-[420px] bg-white flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border-[2px] sm:border-[3px] border-white/60">
 
         <!-- 憑證彈窗 Modal -->
         <div id="voucher-modal" class="absolute inset-0 z-[60] items-center justify-center p-5 bg-slate-900/80">
@@ -171,28 +171,89 @@
 
             <!-- Tab 3: 專屬地圖 (直接連結 Google Maps) -->
             <div id="tab-maps" class="tab-content h-full">
-                <div class="p-5 flex flex-col items-center justify-center h-full pb-20">
-                    <div class="w-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[2rem] p-8 shadow-xl text-white flex flex-col items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.02] border border-white/20">
-                        <i class="ph-fill ph-map-trifold absolute -right-8 -bottom-8 text-[12rem] opacity-10"></i>
-                        <i class="ph-fill ph-navigation-arrow absolute top-6 right-8 text-4xl opacity-20"></i>
-                        
-                        <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-inner relative z-10 border border-white/30">
-                            <i class="ph-fill ph-google-logo text-4xl text-white"></i>
+                <div class="p-5 flex flex-col h-full pb-20 overflow-y-auto space-y-6">
+                    
+                    <!-- 1. 當地即時天氣預報 (超極簡 API 版 + 每小時定位預報) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3 ml-1">
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1">
+                                <i class="ph-fill ph-cloud-sun text-sky-500 text-lg"></i> 當地即時天氣預報
+                            </h3>
+                            <button onclick="fetchWeather()" class="text-xs text-slate-400 flex items-center gap-1 hover:text-slate-600 transition-colors">
+                                <i class="ph-bold ph-arrows-clockwise"></i> 重新整理
+                            </button>
                         </div>
                         
-                        <h2 class="text-2xl font-black tracking-wide mb-2 relative z-10 text-center">專屬行程儲存地標</h2>
-                        <p class="text-sm text-blue-100 text-center mb-8 relative z-10 font-medium px-4 leading-relaxed">
-                            已為您整理好本次旅行的<br/>完整 Google Maps 清單
-                        </p>
-                        
-                        <a href="https://maps.app.goo.gl/TNxogxAoDMAGPNM76" target="_blank" class="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 text-base font-black rounded-2xl transition-all flex justify-center items-center gap-2 shadow-lg active:scale-95 relative z-10">
-                            <i class="ph-bold ph-arrow-square-out text-xl"></i> 立即打開 Google Maps
-                        </a>
+                        <!-- 京都與大阪 總覽 -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 grid grid-cols-2 gap-4 mb-4">
+                            <!-- 京都天氣 -->
+                            <div class="flex flex-col items-center justify-center p-3 bg-sky-50/50 rounded-xl border border-slate-100 relative">
+                                <span class="text-[10px] font-bold text-slate-400 absolute top-2 left-2 uppercase tracking-wider">Kyoto</span>
+                                <div id="kyoto-icon" class="text-4xl text-sky-400 mb-1 mt-2">
+                                    <i class="ph ph-spinner animate-spin"></i>
+                                </div>
+                                <h4 class="text-sm font-black text-slate-700 mt-1">京都府</h4>
+                                <div class="flex items-end gap-1 mt-1">
+                                    <span id="kyoto-temp" class="text-2xl font-black text-slate-800 tracking-tighter">--</span>
+                                    <span class="text-sm font-bold text-slate-500 mb-0.5">°C</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 大阪天氣 -->
+                            <div class="flex flex-col items-center justify-center p-3 bg-blue-50/50 rounded-xl border border-slate-100 relative">
+                                <span class="text-[10px] font-bold text-slate-400 absolute top-2 left-2 uppercase tracking-wider">Osaka</span>
+                                <div id="osaka-icon" class="text-4xl text-blue-400 mb-1 mt-2">
+                                    <i class="ph ph-spinner animate-spin"></i>
+                                </div>
+                                <h4 class="text-sm font-black text-slate-700 mt-1">大阪府</h4>
+                                <div class="flex items-end gap-1 mt-1">
+                                    <span id="osaka-temp" class="text-2xl font-black text-slate-800 tracking-tighter">--</span>
+                                    <span class="text-sm font-bold text-slate-500 mb-0.5">°C</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 每小時天氣趨勢 (自動定位) -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 id="hourly-location-name" class="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+                                    <i class="ph-fill ph-map-pin text-red-500"></i> 定位中...
+                                </h4>
+                            </div>
+                            <!-- 橫向滑動容器 -->
+                            <div id="hourly-container" class="flex overflow-x-auto gap-2 pb-2 no-scrollbar scroll-smooth">
+                                <!-- JS 動態載入每小時卡片 -->
+                            </div>
+                        </div>
                     </div>
-                    
-                    <p class="text-xs text-slate-500 mt-6 flex items-center gap-1.5 font-medium bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">
-                        <i class="ph-fill ph-info text-slate-400"></i> 點擊將直接喚醒手機內建的地圖 App
-                    </p>
+
+                    <!-- 2. 行程導航 -->
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1">
+                            <i class="ph-fill ph-map-pin text-indigo-500 text-lg"></i> 專屬行程導航
+                        </h3>
+                        <div class="w-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[2rem] p-8 shadow-sm text-white flex flex-col items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.02] border border-white/20">
+                            <i class="ph-fill ph-map-trifold absolute -right-8 -bottom-8 text-[12rem] opacity-10"></i>
+                            <i class="ph-fill ph-navigation-arrow absolute top-6 right-8 text-4xl opacity-20"></i>
+                            
+                            <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-inner relative z-10 border border-white/30">
+                                <i class="ph-fill ph-google-logo text-4xl text-white"></i>
+                            </div>
+                            
+                            <h2 class="text-2xl font-black tracking-wide mb-2 relative z-10 text-center">行程儲存地標</h2>
+                            <p class="text-sm text-blue-100 text-center mb-8 relative z-10 font-medium px-4 leading-relaxed">
+                                已為您整理好本次旅行的<br/>完整 Google Maps 清單
+                            </p>
+                            
+                            <a href="https://maps.app.goo.gl/TNxogxAoDMAGPNM76" target="_blank" class="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 text-base font-black rounded-2xl transition-all flex justify-center items-center gap-2 shadow-lg active:scale-95 relative z-10">
+                                <i class="ph-bold ph-arrow-square-out text-xl"></i> 打開 Google Maps
+                            </a>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-4 flex items-center justify-center gap-1.5 font-medium">
+                            <i class="ph-fill ph-info text-slate-400"></i> 點擊將直接喚醒手機內建的地圖 App
+                        </p>
+                    </div>
+
                 </div>
             </div>
 
@@ -276,7 +337,7 @@
           { time: "14:00-15:30", title: "伊根舟屋 ＆ 觀光遊船", transport: "私人包車", desc: "搭乘遊船(¥1200/人)餵海鷗老鷹，近距離拍攝水上舟屋。", mapQuery: "Ine+no+Funaya" },
           { time: "15:30-16:30", title: "下午茶：舟屋日和", transport: "步行", desc: "在絕美海景咖啡廳享受慢活節奏☕️。", mapQuery: "Funaya+Biyori", icon: "ph-coffee", iconColor: "text-amber-700" },
           { time: "16:30-19:00", title: "跨城直達 ➔ 大阪 The Peak", transport: "私人包車", desc: "車上睡覺休息，司機連人帶行李直達大阪飯店門口。", mapQuery: "The+Peak+Nipponbashi+Apartment", voucherType: "osaka_hotel" },
-          { time: "19:30-21:00", title: "晚餐：天ぷら まきの (Makino)", transport: "步行", desc: "前往難波千日前店享用現炸現上的超人氣天婦羅，餐後散步回飯店。", mapQuery: "Tempura+Makino+Namba+Sennichimae", icon: "ph-bowl-food", iconColor: "text-orange-500" }
+          { time: "19:30-21:00", title: "晚餐：天ぷら まきの (Makino)", transport: "步行散步", desc: "前往難波千日前店享用現炸現上的超人氣天婦羅，餐後散步回飯店。", mapQuery: "Tempura+Makino+Namba+Sennichimae", icon: "ph-bowl-food", iconColor: "text-orange-500" }
         ]
       },
       {
@@ -424,9 +485,9 @@
     function renderDaySelector() {
         const container = document.getElementById('day-selector');
         container.innerHTML = itineraryData.map((d, idx) => `
-            <button onclick="setDay(${idx})" class="flex-1 flex flex-col items-center py-2 px-1 rounded-xl transition-all ${currentDayIndex === idx ? 'bg-red-600 text-white shadow-md scale-105' : 'bg-slate-50 text-slate-600 border border-slate-200'} min-w-[15%]">
+            <button onclick="setDay(${idx})" class="flex-1 flex flex-col items-center py-2 px-1 rounded-xl transition-all ${currentDayIndex === idx ? 'bg-red-600 text-white shadow-md scale-105' : 'bg-white text-slate-500 border border-slate-200'} min-w-[15%]">
                 <span class="text-[11px] font-bold mb-0.5 whitespace-nowrap">${d.day}</span>
-                <span class="text-[9px] ${currentDayIndex === idx ? 'text-red-100' : 'text-slate-500'} whitespace-nowrap">${d.date}</span>
+                <span class="text-[9px] ${currentDayIndex === idx ? 'text-red-100' : 'text-slate-400'} whitespace-nowrap">${d.date}</span>
             </button>
         `).join('');
     }
@@ -662,8 +723,12 @@
         activeBtn.classList.remove('text-slate-400');
         activeBtn.classList.add(colorClass);
         activeBtn.querySelector('i').classList.add(fillClass);
-    }
 
+        // 如果切換到地圖，抓取最新天氣
+        if (tabId === 'maps') {
+            fetchWeather();
+        }
+    }
     function openVoucher(type) {
         const modal = document.getElementById('voucher-modal');
         const content = document.getElementById('voucher-content');
@@ -791,7 +856,7 @@
             </div>`;
         } else if (type === 'haruka') {
             html = `
-            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-sm flex flex-col">
+            <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-w-[90%] mx-auto flex flex-col">
               <div class="bg-cyan-700 p-6 text-white flex justify-between items-center relative overflow-hidden shrink-0">
                 <div class="z-10"><p class="text-cyan-100 text-[10px] font-black uppercase tracking-widest mb-1">JR WEST</p><h2 class="text-2xl font-black tracking-wide">Haruka 特急兌換券</h2></div>
                 <i class="ph-fill ph-train text-7xl opacity-20 absolute -right-2 top-2 z-0"></i>
@@ -830,6 +895,114 @@
     function closeVoucher() {
         document.getElementById('voucher-modal').classList.remove('active');
     }
+<!-- ... existing code ... -->
+    function closeVoucher() {
+        document.getElementById('voucher-modal').classList.remove('active');
+    }
+
+    // --- 極簡天氣 API 抓取邏輯 ---
+    function closeVoucher() {
+        document.getElementById('voucher-modal').classList.remove('active');
+    }
+
+    // --- 極簡天氣 API 抓取邏輯 ---
+    const getWeatherIcon = (code) => {
+        if (code <= 3) return '<i class="ph-fill ph-sun text-amber-500"></i>'; // 晴朗/多雲
+        if (code >= 45 && code <= 48) return '<i class="ph-fill ph-cloud-fog text-slate-400"></i>'; // 霧
+        if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return '<i class="ph-fill ph-cloud-rain text-blue-500"></i>'; // 陣雨
+        if (code >= 71 && code <= 77) return '<i class="ph-fill ph-snowflake text-sky-300"></i>'; // 雪
+        if (code >= 95) return '<i class="ph-fill ph-cloud-lightning text-indigo-500"></i>'; // 雷雨
+        return '<i class="ph-fill ph-cloud text-slate-400"></i>';
+    };
+
+    async function fetchWeather() {
+        const kyotoTemp = document.getElementById('kyoto-temp');
+        const osakaTemp = document.getElementById('osaka-temp');
+        const kyotoIcon = document.getElementById('kyoto-icon');
+        const osakaIcon = document.getElementById('osaka-icon');
+        
+        kyotoTemp.innerText = '--'; osakaTemp.innerText = '--';
+        kyotoIcon.innerHTML = '<i class="ph ph-spinner animate-spin"></i>';
+        osakaIcon.innerHTML = '<i class="ph ph-spinner animate-spin"></i>';
+
+        try {
+            const kyotoRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.01&longitude=135.76&current_weather=true');
+            const kyotoData = await kyotoRes.json();
+            kyotoTemp.innerText = Math.round(kyotoData.current_weather.temperature);
+            kyotoIcon.innerHTML = getWeatherIcon(kyotoData.current_weather.weathercode);
+            
+            const osakaRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=34.69&longitude=135.50&current_weather=true');
+            const osakaData = await osakaRes.json();
+            osakaTemp.innerText = Math.round(osakaData.current_weather.temperature);
+            osakaIcon.innerHTML = getWeatherIcon(osakaData.current_weather.weathercode);
+        } catch (error) {
+            kyotoTemp.innerText = 'Err'; osakaTemp.innerText = 'Err';
+            kyotoIcon.innerHTML = '<i class="ph-fill ph-warning-circle text-red-400"></i>';
+        }
+
+        // 同時啟動定位與每小時天氣抓取
+        requestCurrentLocationHourly();
+    }
+
+    function requestCurrentLocationHourly() {
+        const container = document.getElementById('hourly-container');
+        container.innerHTML = '<div class="w-full text-center py-6 text-xs text-slate-400 font-bold"><i class="ph ph-spinner animate-spin text-lg mb-1 block"></i> 正在定位...</div>';
+        
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => fetchHourlyWeather(pos.coords.latitude, pos.coords.longitude, '📍 您目前的位置 (未來 24H)'),
+                (err) => fetchHourlyWeather(35.01, 135.76, '📍 京都 (定位失敗/未授權)'), // Fallback
+                { timeout: 5000 }
+            );
+        } else {
+            fetchHourlyWeather(35.01, 135.76, '📍 京都 (裝置不支援)');
+        }
+    }
+
+    async function fetchHourlyWeather(lat, lon, locName) {
+        document.getElementById('hourly-location-name').innerHTML = `<i class="ph-fill ph-map-pin text-red-500"></i> ${locName}`;
+        const container = document.getElementById('hourly-container');
+        
+        try {
+            // 使用 unixtime 確保時區正確對齊
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weathercode&timeformat=unixtime&timezone=auto&forecast_days=2`);
+            const data = await res.json();
+            
+            const currentEpoch = Math.floor(Date.now() / 1000);
+            // 找出最接近「現在時間」的索引 (往前扣一小時確保涵蓋當下)
+            let startIndex = data.hourly.time.findIndex(t => t > currentEpoch - 3600);
+            if (startIndex === -1) startIndex = 0;
+            
+            let html = '';
+            // 渲染未來 24 小時
+            for(let i = startIndex; i < startIndex + 24; i++) {
+                if(i >= data.hourly.time.length) break;
+                const timeSec = data.hourly.time[i];
+                const temp = Math.round(data.hourly.temperature_2m[i]);
+                const code = data.hourly.weathercode[i];
+                
+                const date = new Date(timeSec * 1000);
+                const hourStr = date.getHours().toString().padStart(2, '0') + ':00';
+                const iconStr = getWeatherIcon(code);
+                
+                // 第一個時間(現在)加上特別底色
+                const isNow = i === startIndex;
+                const bgClass = isNow ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100';
+                const timeColor = isNow ? 'text-red-500' : 'text-slate-400';
+                
+                html += `
+                    <div class="flex flex-col items-center justify-center min-w-[60px] ${bgClass} border rounded-xl py-2 shrink-0 shadow-sm">
+                        <span class="text-[10px] ${timeColor} font-bold mb-1 tracking-wider">${isNow ? '現在' : hourStr}</span>
+                        <div class="text-2xl mb-1">${iconStr}</div>
+                        <span class="text-sm font-black text-slate-700">${temp}°</span>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = '<div class="w-full text-center py-4 text-xs text-red-400 font-bold">預報載入失敗</div>';
+        }
+    }
 
     // --- 程式初始化執行 ---
     window.onload = () => {
@@ -844,3 +1017,4 @@
 
 </body>
 </html>
+```eof
