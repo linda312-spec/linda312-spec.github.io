@@ -316,7 +316,25 @@
           { time: "09:30-11:00", title: "伏見稻荷大社", transport: "步行", desc: "走千本鳥居前段拍照即可折返，沿路走走逛逛小吃街。", mapQuery: "Fushimi+Inari+Taisha" },
           { time: "11:00-11:20", title: "伏見稻荷 ➔ 清水寺", transport: "計程車", desc: "直接要求司機開到清水寺門口，省去爬坡體力。", mapQuery: "Kiyomizu-dera" },
           { time: "11:20-12:30", title: "清水寺參拜", transport: "步行", desc: "門票¥500。抽籤、買御守，拍攝仁王門、清水舞台、三重塔、音羽瀑布。", mapQuery: "Kiyomizu-dera" },
-          { time: "12:30-15:30", title: "二三年坂 ＆ 午餐伴手禮", transport: "順坡步行", desc: "沿路往下逛，留意轉彎處。午餐吃清水順正湯豆腐，沿街採買七味家本舖、伊藤軒糰子、藤菜美醬油糰子，並前往 GOKAGO 喝抹茶！", mapQuery: "Sannenzaka", icon: "ph-shopping-bag", iconColor: "text-pink-500" },
+          { 
+            time: "12:30-15:30", 
+            title: "二三年坂 ＆ 午餐伴手禮", 
+            transport: "順坡步行", 
+            desc: "沿路往下逛，留意轉彎處。午餐吃清水順正湯豆腐，沿街採買七味家本舖、伊藤軒糰子、藤菜美醬油糰子，並前往 GOKAGO 喝抹茶！", 
+            mapQuery: "Sannenzaka", 
+            icon: "ph-shopping-bag", 
+            iconColor: "text-pink-500",
+            routeTitle: "展開沿途必逛門市清單",
+            routeIcon: "ph-storefront",
+            routeColorClass: "text-pink-500",
+            routeStops: [
+              { name: "清水順正 おかべ家 (午餐)", mapQuery: "Kiyomizu+Junsei+Okabeya" },
+              { name: "七味家本舖", mapQuery: "Shichimiya+Honpo" },
+              { name: "伊藤軒/SOU・SOU 清水店", mapQuery: "Ito-ken+SOU+SOU+Kiyomizu" },
+              { name: "藤菜美 三年坂本店", mapQuery: "Fujinami+Sannenzaka" },
+              { name: "GOKAGO (抹茶)", mapQuery: "GOKAGO+Kyoto" }
+            ]
+          },
           { time: "15:30-15:40", title: "前往 % ARABICA", transport: "步行", desc: "散步前往八坂之塔旁的 % ARABICA 京都東山店買咖啡。", mapQuery: "Arabica+Kyoto+Higashiyama", icon: "ph-coffee", iconColor: "text-amber-700" },
           { time: "15:40-16:30", title: "花見小路 ➔ 祇園", transport: "步行散策", desc: "沿路拍五重塔、八坂通，欣賞祇園花街的藝妓街區氛圍。", mapQuery: "Hanamikoji+Street" },
           { time: "17:30-19:30", title: "晚餐：モリタ屋 木屋町店", transport: "步行", desc: "於鴨川納涼床享用頂級壽喜燒。", mapQuery: "Moritaya+Kiyamachi" },
@@ -505,10 +523,14 @@
                     </button>
                 </div>` : '';
 
-            // 處理大眾交通停靠站路線
+            // 處理大眾交通停靠站/沿途門市路線
             let routeHtml = '';
             if (ev.routeStops && ev.routeStops.length > 0) {
                 const routeId = `route-${currentDayIndex}-${i}`;
+                const routeLabel = ev.routeTitle || '查看沿途停靠站';
+                const routeIcon = ev.routeIcon || 'ph-train-regional';
+                const routeIconColor = ev.routeColorClass || 'text-indigo-500';
+                
                 const stopsList = ev.routeStops.map((stop, sIdx) => {
                     const isFirst = sIdx === 0;
                     const isLast = sIdx === ev.routeStops.length - 1;
@@ -516,21 +538,36 @@
                     const textColor = isFirst || isLast ? 'text-slate-700 font-bold' : 'text-slate-500 font-medium';
                     const textSize = isFirst || isLast ? 'text-xs' : 'text-[11px]';
                     
+                    let stopContent = '';
+                    if (typeof stop === 'object' && stop.mapQuery) {
+                        // 可點擊的門市導航
+                        stopContent = `
+                            <a href="https://www.google.com/maps/search/?api=1&query=${stop.mapQuery}" target="_blank" class="text-[11px] font-bold text-slate-700 pb-3 flex items-center gap-1.5 hover:text-pink-600 transition-colors active:scale-95 group">
+                                ${stop.name} 
+                                <span class="bg-blue-50 text-blue-500 p-1 rounded-full"><i class="ph-bold ph-navigation-arrow text-[10px]"></i></span>
+                            </a>
+                        `;
+                    } else {
+                        // 純文字車站
+                        const stopName = typeof stop === 'object' ? stop.name : stop;
+                        stopContent = `<div class="${textSize} ${textColor} pb-3">${stopName}</div>`;
+                    }
+                    
                     return `
                         <div class="flex items-start gap-3 relative z-10">
                             <div class="flex flex-col items-center mt-1">
                                 <div class="w-2.5 h-2.5 rounded-full border-2 ${dotColor} z-10"></div>
                             </div>
-                            <div class="${textSize} ${textColor} pb-3">${stop}</div>
+                            ${stopContent}
                         </div>
                     `;
                 }).join('');
 
                 routeHtml = `
                     <div class="mt-2 pl-2 pr-2 border-t border-slate-50 pt-2.5 pb-1">
-                        <button onclick="toggleRouteStops('${routeId}')" class="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors w-full text-left active:scale-[0.98]">
-                            <i class="ph-bold ph-train-regional text-indigo-500 text-sm"></i>
-                            <span>查看沿途停靠站</span>
+                        <button onclick="toggleRouteStops('${routeId}')" class="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors w-full text-left active:scale-[0.98]">
+                            <i class="ph-bold ${routeIcon} ${routeIconColor} text-sm"></i>
+                            <span>${routeLabel}</span>
                             <i id="icon-${routeId}" class="ph-bold ph-caret-down ml-auto transition-transform"></i>
                         </button>
                         <div id="${routeId}" class="hidden mt-3 pl-1 transition-all">
