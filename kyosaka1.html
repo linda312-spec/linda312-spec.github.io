@@ -26,7 +26,7 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        input, textarea {
+        input, textarea, select {
             -webkit-user-select: auto;
             user-select: auto;
         }
@@ -40,6 +40,10 @@
         #voucher-modal { display: none; flex-direction: column; }
         #voucher-modal.active { display: flex; animation: fadeInModal 0.2s ease-out forwards; }
         @keyframes fadeInModal { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(4px); } }
+        
+        #day-selector {
+            flex-wrap: nowrap; 
+        }
     </style>
 </head>
 
@@ -109,7 +113,9 @@
 
                     <!-- 固定支出 (可折疊) -->
                     <div>
-                        <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1"><i class="ph-fill ph-lock-key text-slate-500"></i> 已知固定支出 (點擊可收折)</h3>
+                        <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center justify-between">
+                            <span class="flex items-center gap-1"><i class="ph-fill ph-lock-key text-slate-500"></i> 固定支出 (勾選可變更為已付清)</span>
+                        </h3>
                         <div class="bg-slate-50 rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                             <div id="fixed-budget-list"></div>
                             <div class="p-3 bg-slate-100/50 text-right border-t border-slate-200">
@@ -133,24 +139,36 @@
                                     </div>
                                 </div>
                                 <i class="ph-bold ph-arrows-left-right text-slate-300 mt-5"></i>
-                                <div class="w-20 shrink-0">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">匯率</label>
-                                    <input type="number" id="rate-input" step="0.001" value="0.21" class="w-full bg-white text-base font-bold text-slate-800 rounded-lg px-2 py-1.5 border border-slate-300 focus:outline-none focus:border-red-500 transition-colors mt-1 text-center">
+                                <div class="w-24 shrink-0">
+                                    <label id="rate-label" class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">即時匯率中...</label>
+                                    <input type="number" id="rate-input" step="0.001" value="0.20" class="w-full bg-white text-base font-bold text-slate-800 rounded-lg px-2 py-1.5 border border-slate-300 focus:outline-none focus:border-red-500 transition-colors mt-1 text-center">
                                 </div>
                             </div>
 
-                            <form id="expense-form" class="flex gap-2 items-end">
-                                <div class="flex-1">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">消費項目</label>
-                                    <input type="text" id="expense-name" placeholder="如: 晚餐/藥妝" required class="w-full bg-white text-sm font-medium rounded-lg px-3 py-2 border border-slate-300 focus:outline-none focus:border-red-500 transition-colors mt-1">
+                            <form id="expense-form" class="space-y-3">
+                                <div class="flex gap-2">
+                                    <div class="flex-1">
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">消費項目</label>
+                                        <input type="text" id="expense-name" placeholder="如: 晚餐/藥妝" required class="w-full bg-white text-sm font-medium rounded-lg px-3 py-2 border border-slate-300 focus:outline-none focus:border-red-500 transition-colors mt-1">
+                                    </div>
+                                    <div class="w-28 shrink-0">
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">台幣 (TWD)</label>
+                                        <input type="number" id="expense-amount" placeholder="自動換算" required class="w-full bg-red-50 text-sm font-bold text-red-600 rounded-lg px-3 py-2 border border-red-200 focus:outline-none focus:border-red-500 transition-colors mt-1">
+                                    </div>
                                 </div>
-                                <div class="w-24 shrink-0">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">台幣 (TWD)</label>
-                                    <input type="number" id="expense-amount" placeholder="自動換算" required class="w-full bg-red-50 text-sm font-bold text-red-600 rounded-lg px-3 py-2 border border-red-200 focus:outline-none focus:border-red-500 transition-colors mt-1">
+                                <div class="flex gap-2 items-end">
+                                    <div class="flex-1">
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">付款方式</label>
+                                        <select id="expense-method" class="w-full bg-white text-sm font-bold text-slate-700 rounded-lg px-3 py-2 border border-slate-300 focus:outline-none focus:border-red-500 transition-colors mt-1">
+                                            <option value="現金">💵 現金 (Cash)</option>
+                                            <option value="信用卡">💳 信用卡 (Credit Card)</option>
+                                            <option value="交通卡">🎫 交通卡 (ICOCA/Suica)</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 active:scale-95 transition-all shrink-0 h-[38px] shadow-sm font-bold text-sm flex items-center gap-1">
+                                        <i class="ph-bold ph-plus text-base"></i> 新增
+                                    </button>
                                 </div>
-                                <button type="submit" class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 active:scale-95 transition-all shrink-0 h-[38px] shadow-sm">
-                                    <i class="ph-bold ph-plus text-lg"></i>
-                                </button>
                             </form>
                         </div>
 
@@ -392,18 +410,18 @@
       }
     ];
 
-    const fixedBudgetData = [
-      { status: "paid", icon: "ph-airplane-tilt", color: "text-blue-500", bg: "bg-blue-100", title: "交通機票", desc: "國泰航空", total: 56224, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
-      { status: "unpaid", icon: "ph-car-profile", color: "text-indigo-500", bg: "bg-indigo-100", title: "專車接送", desc: "台中⇌桃園 ($1900×2趟)", total: 3800, tag: "未付尾款", tagColor: "bg-red-100 text-red-600" },
-      { status: "paid", icon: "ph-shield-check", color: "text-emerald-500", bg: "bg-emerald-100", title: "旅遊保險", desc: "中信升級版", total: 4952, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
-      { status: "unpaid", icon: "ph-wifi-high", color: "text-cyan-500", bg: "bg-cyan-100", title: "網卡通訊", desc: "eSIM", total: 2400, tag: "未買未付", tagColor: "bg-red-100 text-red-600" },
-      { status: "paid", icon: "ph-train", color: "text-blue-600", bg: "bg-blue-100", title: "JR Haruka", desc: "機場 ➔ 京都", total: 1600, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
-      { status: "unpaid", icon: "ph-car-profile", color: "text-slate-500", bg: "bg-slate-200", title: "INNN 拼車", desc: "大阪 ➔ 機場 (¥8760)", total: 1840, tag: "未預約未付", tagColor: "bg-red-100 text-red-600" },
-      { status: "unpaid", icon: "ph-car", color: "text-amber-600", bg: "bg-amber-100", title: "王先生包車", desc: "Day3 行程 (¥58000)", total: 12180, tag: "現場付現", tagColor: "bg-red-100 text-red-600" }, 
-      { status: "unpaid", icon: "ph-ticket", color: "text-teal-500", bg: "bg-teal-100", title: "市區景點門票", desc: "清水寺/勝尾寺/通天閣等", total: 3780, tag: "現場付現", tagColor: "bg-amber-100 text-amber-700" }, 
-      { status: "unpaid", icon: "ph-ticket", color: "text-teal-600", bg: "bg-teal-100", title: "包車景點門票", desc: "纜車¥1000+船¥1200/人", total: 1848, tag: "現場付現", tagColor: "bg-amber-100 text-amber-700" }, 
-      { status: "paid", icon: "ph-bed", color: "text-rose-500", bg: "bg-rose-100", title: "京都住宿", desc: "OMO3 京都東寺", total: 6332, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
-      { status: "paid", icon: "ph-bed", color: "text-rose-600", bg: "bg-rose-100", title: "大阪住宿", desc: "The Peak", total: 10008, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+    let fixedBudgetData = [
+      { id: 'f1', status: "paid", icon: "ph-airplane-tilt", color: "text-blue-500", bg: "bg-blue-100", title: "交通機票", desc: "國泰航空", total: 56224, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { id: 'f2', status: "unpaid", icon: "ph-car-profile", color: "text-indigo-500", bg: "bg-indigo-100", title: "專車接送", desc: "台中⇌桃園 ($1900×2趟)", total: 3800, tag: "未付尾款", tagColor: "bg-red-100 text-red-600" },
+      { id: 'f3', status: "paid", icon: "ph-shield-check", color: "text-emerald-500", bg: "bg-emerald-100", title: "旅遊保險", desc: "中信升級版", total: 4952, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { id: 'f4', status: "paid", icon: "ph-wifi-high", color: "text-cyan-500", bg: "bg-cyan-100", title: "網卡通訊", desc: "eSIM", total: 2131, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { id: 'f5', status: "paid", icon: "ph-train", color: "text-blue-600", bg: "bg-blue-100", title: "JR Haruka", desc: "機場 ➔ 京都", total: 1600, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { id: 'f6', status: "unpaid", icon: "ph-car-profile", color: "text-slate-500", bg: "bg-slate-200", title: "INNN 拼車", desc: "大阪 ➔ 機場 (¥8760)", total: 1840, tag: "未預約未付", tagColor: "bg-red-100 text-red-600" },
+      { id: 'f7', status: "unpaid", icon: "ph-car", color: "text-amber-600", bg: "bg-amber-100", title: "王先生包車", desc: "Day3 行程 (¥58000)", total: 12180, tag: "現場付現", tagColor: "bg-red-100 text-red-600" }, 
+      { id: 'f8', status: "unpaid", icon: "ph-ticket", color: "text-teal-500", bg: "bg-teal-100", title: "市區景點門票", desc: "清水寺/勝尾寺/通天閣等", total: 3780, tag: "現場付現", tagColor: "bg-amber-100 text-amber-700" }, 
+      { id: 'f9', status: "unpaid", icon: "ph-ticket", color: "text-teal-600", bg: "bg-teal-100", title: "包車景點門票", desc: "纜車¥1000+船¥1200/人", total: 1848, tag: "現場付現", tagColor: "bg-amber-100 text-amber-700" }, 
+      { id: 'f10', status: "paid", icon: "ph-bed", color: "text-rose-500", bg: "bg-rose-100", title: "京都住宿", desc: "OMO3 京都東寺", total: 6332, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
+      { id: 'f11', status: "paid", icon: "ph-bed", color: "text-rose-600", bg: "bg-rose-100", title: "大阪住宿", desc: "The Peak", total: 10008, tag: "已付清", tagColor: "bg-emerald-100 text-emerald-700" },
     ];
 
     let checklists = [
@@ -437,7 +455,7 @@
       {
         category: "📱 網卡與實用 App",
         items: [
-          { name: "購買 eSIM 並確認開通設定方式", isDone: false },
+          { name: "購買 eSIM 並確認開通設定方式", isDone: true },
           { name: "下載 Google Maps (建議將飯店與景點加星號)", isDone: false },
           { name: "下載天氣與餐廳 App (tenki.jp, Tabelog, Kuli Kuli)", isDone: false },
           { name: "下載日本優惠券 App (省錢必備)", isDone: false }
@@ -483,17 +501,32 @@
         category: "🔌 3C用品類", 
         items: [ 
           { name: "多條充電線", isDone: false }, 
-          { name: "相機、腳架、自拍棒", isDone: false }, 
+          { name: "相機, 腳架, 自拍棒", isDone: false }, 
           { name: "相機電池", isDone: false }, 
           { name: "電池夾鏈袋", isDone: false }
         ] 
       }
     ];
 
-    let dynamicExpenses = [{ id: 1, name: "ICOCA 儲值 (4人)", amount: 2100 }];
-    let currentExchangeRate = 0.21;
+    let dynamicExpenses = [{ id: 1, name: "ICOCA 儲值 (4人)", amount: 2100, method: "現金" }];
+    let currentExchangeRate = 0.20;
     let currentDayIndex = 0; // 預設跳到 Day 1
     let fixedBudgetExpanded = { paid: false, unpaid: true }; // 預設打開待付款，收起已付清
+
+    // 自動抓取即時匯率
+    async function fetchLiveExchangeRate() {
+        try {
+            const res = await fetch('https://open.er-api.com/v6/latest/JPY');
+            const data = await res.json();
+            if (data && data.rates && data.rates.TWD) {
+                currentExchangeRate = parseFloat(data.rates.TWD.toFixed(4));
+                document.getElementById('rate-input').value = currentExchangeRate;
+                document.getElementById('rate-label').innerText = '即時匯率 (自動)';
+            }
+        } catch (e) {
+            console.log('使用預設匯率');
+        }
+    }
 
     function renderDaySelector() {
         const container = document.getElementById('day-selector');
@@ -523,7 +556,7 @@
                     </button>
                 </div>` : '';
 
-            // 處理大眾交通停靠站/沿途門市路線
+            // 處理停靠站/門市清單
             let routeHtml = '';
             if (ev.routeStops && ev.routeStops.length > 0) {
                 const routeId = `route-${currentDayIndex}-${i}`;
@@ -540,7 +573,6 @@
                     
                     let stopContent = '';
                     if (typeof stop === 'object' && stop.mapQuery) {
-                        // 可點擊的門市導航
                         stopContent = `
                             <a href="https://www.google.com/maps/search/?api=1&query=${stop.mapQuery}" target="_blank" class="text-[11px] font-bold text-slate-700 pb-3 flex items-center gap-1.5 hover:text-pink-600 transition-colors active:scale-95 group">
                                 ${stop.name} 
@@ -548,7 +580,6 @@
                             </a>
                         `;
                     } else {
-                        // 純文字車站
                         const stopName = typeof stop === 'object' ? stop.name : stop;
                         stopContent = `<div class="${textSize} ${textColor} pb-3">${stopName}</div>`;
                     }
@@ -580,7 +611,6 @@
                 `;
             }
 
-            // 判斷交通工具顏色與圖示
             let transportColor = 'bg-slate-100 text-slate-600'; 
             let transportIcon = 'ph-map-pin';
             const t = ev.transport;
@@ -646,6 +676,23 @@
         renderFixedBudget();
     }
 
+    function toggleFixedItemStatus(id) {
+        const item = fixedBudgetData.find(i => i.id === id);
+        if (item) {
+            if (item.status === 'unpaid') {
+                item.status = 'paid';
+                item.tag = '已付清';
+                item.tagColor = 'bg-emerald-100 text-emerald-700';
+            } else {
+                item.status = 'unpaid';
+                item.tag = '未付款';
+                item.tagColor = 'bg-red-100 text-red-600';
+            }
+            renderFixedBudget();
+            updateTotals();
+        }
+    }
+
     function renderFixedBudget() {
         const container = document.getElementById('fixed-budget-list');
         const paidItems = fixedBudgetData.filter(item => item.status === 'paid');
@@ -673,16 +720,16 @@
             `;
             
             items.forEach(item => {
+                const isPaid = item.status === 'paid';
                 groupHtml += `
                     <div class="flex items-center justify-between p-3.5 border-t border-slate-100 last:border-0 ml-2 mr-2">
                         <div class="flex items-center gap-3">
-                            <div class="p-2.5 rounded-xl ${item.bg} ${item.color}"><i class="${item.icon} text-lg"></i></div>
+                            <button onclick="toggleFixedItemStatus('${item.id}')" class="text-xl text-slate-300 hover:text-emerald-500 transition-colors shrink-0">
+                                <i class="ph-fill ${isPaid ? 'ph-check-circle text-emerald-500' : 'ph-circle text-slate-300'}"></i>
+                            </button>
                             <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <p class="text-sm font-bold text-slate-800 leading-none">${item.title}</p>
-                                    ${item.tag ? `<span class="text-[9px] px-1.5 py-0.5 rounded-md font-bold ${item.tagColor}">${item.tag}</span>` : ''}
-                                </div>
-                                <p class="text-[10px] text-slate-500 font-medium">${item.desc}</p>
+                                <p class="text-sm font-bold text-slate-800 leading-snug">${item.title}</p>
+                                <p class="text-xs font-semibold ${item.color} mt-0.5">${item.desc}</p>
                             </div>
                         </div>
                         <p class="text-sm font-black text-slate-800">${item.total.toLocaleString()}</p>
@@ -706,9 +753,14 @@
         } else {
             container.innerHTML = dynamicExpenses.map(exp => `
                 <div class="flex items-center justify-between p-3.5 border-b border-slate-100 last:border-0">
-                    <p class="text-sm font-bold text-slate-700">${exp.name}</p>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <p class="text-sm font-bold text-slate-700">${exp.name}</p>
+                            <span class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold">${exp.method || '現金'}</span>
+                        </div>
+                    </div>
                     <div class="flex items-center gap-3">
-                        <p class="text-sm font-black text-slate-800">${exp.amount.toLocaleString()}</p>
+                        <p class="text-sm font-black text-slate-800">NT$ ${exp.amount.toLocaleString()}</p>
                         <button onclick="removeExpense(${exp.id})" class="text-slate-300 hover:text-red-500 active:scale-95 transition-transform"><i class="ph-bold ph-trash text-lg"></i></button>
                     </div>
                 </div>
@@ -744,8 +796,9 @@
         e.preventDefault();
         const name = document.getElementById('expense-name').value;
         const amount = document.getElementById('expense-amount').value;
+        const method = document.getElementById('expense-method').value;
         if(name && amount) {
-            dynamicExpenses.push({ id: Date.now(), name: name, amount: parseInt(amount, 10) });
+            dynamicExpenses.push({ id: Date.now(), name: name, amount: parseInt(amount, 10), method: method });
             document.getElementById('expense-name').value = '';
             document.getElementById('expense-amount').value = '';
             document.getElementById('jpy-input').value = '';
@@ -802,7 +855,6 @@
         activeBtn.classList.add(colorClass);
         activeBtn.querySelector('i').classList.add(fillClass);
 
-        // 如果切換到地圖，抓取最新天氣
         if (tabId === 'maps') {
             fetchWeather();
         }
@@ -1010,7 +1062,6 @@
             kyotoIcon.innerHTML = '<i class="ph-fill ph-warning-circle text-red-400"></i>';
         }
 
-        // 同時啟動定位與每小時天氣抓取
         requestCurrentLocationHourly();
     }
 
@@ -1021,7 +1072,7 @@
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => fetchHourlyWeather(pos.coords.latitude, pos.coords.longitude, '📍 您目前的位置 (未來 24H)'),
-                (err) => fetchHourlyWeather(35.01, 135.76, '📍 京都 (定位失敗/未授權)'), // Fallback
+                (err) => fetchHourlyWeather(35.01, 135.76, '📍 京都 (定位失敗/未授權)'),
                 { timeout: 5000 }
             );
         } else {
@@ -1034,17 +1085,14 @@
         const container = document.getElementById('hourly-container');
         
         try {
-            // 使用 unixtime 確保時區正確對齊
             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weathercode&timeformat=unixtime&timezone=auto&forecast_days=2`);
             const data = await res.json();
             
             const currentEpoch = Math.floor(Date.now() / 1000);
-            // 找出最接近「現在時間」的索引 (往前扣一小時確保涵蓋當下)
             let startIndex = data.hourly.time.findIndex(t => t > currentEpoch - 3600);
             if (startIndex === -1) startIndex = 0;
             
             let html = '';
-            // 渲染未來 24 小時
             for(let i = startIndex; i < startIndex + 24; i++) {
                 if(i >= data.hourly.time.length) break;
                 const timeSec = data.hourly.time[i];
@@ -1055,7 +1103,6 @@
                 const hourStr = date.getHours().toString().padStart(2, '0') + ':00';
                 const iconStr = getWeatherIcon(code);
                 
-                // 第一個時間(現在)加上特別底色
                 const isNow = i === startIndex;
                 const bgClass = isNow ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100';
                 const timeColor = isNow ? 'text-red-500' : 'text-slate-400';
@@ -1076,6 +1123,7 @@
 
     // --- 程式初始化執行 ---
     window.onload = () => {
+        fetchLiveExchangeRate();
         renderDaySelector();
         renderItinerary();
         renderFixedBudget();
