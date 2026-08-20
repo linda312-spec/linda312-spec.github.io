@@ -67,8 +67,8 @@
         <rect x="0" y="0" width="100%" height="100%" fill="url(#bg-daruma-pattern)" />
     </svg>
 
-    <!-- App 框架容器 -->
-    <div class="w-full h-full max-w-[420px] bg-white flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border-[2px] sm:border-[3px] border-white/60">
+    <!-- App 框架容器 (已解除高度限制，自動填滿視窗) -->
+    <div class="w-full h-[100dvh] max-h-[100dvh] max-w-[420px] bg-white flex flex-col relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden sm:rounded-[2.5rem] border-[2px] sm:border-[3px] border-white/60 mx-auto">
 
         <!-- 憑證彈窗 Modal -->
         <div id="voucher-modal" class="absolute inset-0 z-[60] items-center justify-center p-5 bg-slate-900/80">
@@ -729,6 +729,7 @@
             fetchWeather();
         }
     }
+    
     function openVoucher(type) {
         const modal = document.getElementById('voucher-modal');
         const content = document.getElementById('voucher-content');
@@ -895,15 +896,6 @@
     function closeVoucher() {
         document.getElementById('voucher-modal').classList.remove('active');
     }
-<!-- ... existing code ... -->
-    function closeVoucher() {
-        document.getElementById('voucher-modal').classList.remove('active');
-    }
-
-    // --- 極簡天氣 API 抓取邏輯 ---
-    function closeVoucher() {
-        document.getElementById('voucher-modal').classList.remove('active');
-    }
 
     // --- 極簡天氣 API 抓取邏輯 ---
     const getWeatherIcon = (code) => {
@@ -1017,4 +1009,3 @@
 
 </body>
 </html>
-```eof
