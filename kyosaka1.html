@@ -240,31 +240,14 @@
                         </div>
                     </div>
 
-                    <!-- 2. 行程導航 -->
+                    <!-- 2. 行程專屬自訂地圖 -->
                     <div>
                         <h3 class="text-sm font-bold text-slate-800 mb-3 ml-1 flex items-center gap-1">
-                            <i class="ph-fill ph-map-pin text-indigo-500 text-lg"></i> 專屬行程導航
+                            <i class="ph-fill ph-map-trifold text-indigo-500 text-lg"></i> 專屬行程地圖
                         </h3>
-                        <div class="w-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[2rem] p-8 shadow-sm text-white flex flex-col items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.02] border border-white/20">
-                            <i class="ph-fill ph-map-trifold absolute -right-8 -bottom-8 text-[12rem] opacity-10"></i>
-                            <i class="ph-fill ph-navigation-arrow absolute top-6 right-8 text-4xl opacity-20"></i>
-                            
-                            <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 shadow-inner relative z-10 border border-white/30">
-                                <i class="ph-fill ph-google-logo text-4xl text-white"></i>
-                            </div>
-                            
-                            <h2 class="text-2xl font-black tracking-wide mb-2 relative z-10 text-center">行程儲存地標</h2>
-                            <p class="text-sm text-blue-100 text-center mb-8 relative z-10 font-medium px-4 leading-relaxed">
-                                已為您整理好本次旅行的<br/>完整 Google Maps 清單
-                            </p>
-                            
-                            <a href="https://maps.app.goo.gl/TNxogxAoDMAGPNM76" target="_blank" class="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 text-base font-black rounded-2xl transition-all flex justify-center items-center gap-2 shadow-lg active:scale-95 relative z-10">
-                                <i class="ph-bold ph-arrow-square-out text-xl"></i> 打開 Google Maps
-                            </a>
+                        <div class="w-full h-[360px] bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                            <iframe src="https://www.google.com/maps/d/u/0/embed?mid=18eOVm6DWc3Twq_zz8g91Y8piC7nr2sM&ehbc=2E312F" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-4 flex items-center justify-center gap-1.5 font-medium">
-                            <i class="ph-fill ph-info text-slate-400"></i> 點擊將直接喚醒手機內建的地圖 App
-                        </p>
                     </div>
 
                 </div>
@@ -300,7 +283,7 @@
             </button>
             <button onclick="switchTab('maps')" id="nav-maps" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
                 <i class="ph-fill ph-map-trifold text-xl"></i>
-                <span class="text-[10px] font-bold">地圖</span>
+                <span class="text-[10px] font-bold">天氣地圖</span>
             </button>
             <button onclick="switchTab('checklist')" id="nav-checklist" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors text-slate-400 active:scale-95">
                 <i class="ph-fill ph-check-square text-xl"></i>
@@ -319,12 +302,14 @@
       {
         day: "Day 1", date: "8/25 (二)",
         events: [
-          { time: "07:30-08:30", title: "台中出發 ➔ 桃園機場", transport: "樂高專車", desc: "司機至指定地點接駕，前往桃園機場 T1。", mapQuery: "Taoyuan+International+Airport+Terminal+1", voucherType: "transfer" },
+          { time: "07:30-08:30", title: "台中出發 ➔ 桃園機場", transport: "樂高專車", desc: "線上已預約報到，司機至指定地點接駕，前往桃園機場 T1。", mapQuery: "Taoyuan+International+Airport+Terminal+1", voucherType: "transfer" },
+          { time: "08:30-11:05", title: "機場報到、托運與安檢", transport: "步行", desc: "抵達機場直接托運行李、過安檢，逛免稅店並等待登機。" },
           { time: "11:05-14:55", title: "國泰航空 CX564 (TPE ➔ KIX)", transport: "飛行 (約2.5小時)", desc: "準備起飛，展開京阪雙城之旅！", mapQuery: "Kansai+International+Airport", voucherType: "flight" },
           { time: "14:55-16:00", title: "抵達關西機場 (KIX) 通關", transport: "步行", desc: "盡速完成通關、領取 4 件大行李。", mapQuery: "Kansai+International+Airport" },
           { time: "16:14-17:30", title: "搭乘特急前往京都", transport: "JR Haruka", desc: "對號座，大型行李放置於車廂後方行李架。", mapQuery: "Kyoto+Station", voucherType: "haruka", routeStops: ["關西機場 (KIX)", "天王寺", "大阪", "新大阪", "京都 (Kyoto)"] },
           { time: "17:30-18:00", title: "京都車站 ➔ OMO3", transport: "步行散步", desc: "推行李散步至飯店辦理入住。", mapQuery: "OMO3+Kyoto+Toji", voucherType: "kyoto_hotel" },
-          { time: "18:30-20:00", title: "晚餐：穂屋-MINORIYA-", transport: "步行", desc: "享用飯店周邊高評價的濃郁拉麵，安頓休息。", mapQuery: "Minoriya+Kyoto" }
+          { time: "18:30-20:00", title: "晚餐：穂屋-MINORIYA-", transport: "步行", desc: "享用飯店周邊高評價的濃郁拉麵，安頓休息。", mapQuery: "Minoriya+Kyoto" },
+          { time: "20:00-21:00", title: "京都夜間散步 ＆ 超商補給", transport: "步行散策", desc: "晚餐後於飯店周邊散步，順便逛逛附近的 Lawson、7-11 或 FamilyMart 採買零食飲品。", mapQuery: "Lawson+Kyoto" }
         ]
       },
       {
@@ -338,7 +323,7 @@
             time: "12:30-15:30", 
             title: "二三年坂 ＆ 午餐伴手禮", 
             transport: "順坡步行", 
-            desc: "沿路往下逛，留意轉彎處。午餐吃清水順正湯豆腐，沿街採買七味家本舖、伊藤軒糰子、藤菜美醬油糰子，並前往 GOKAGO 喝抹茶！", 
+            desc: "沿路往下逛，午餐吃清水順正湯豆腐，並依序採買七味家本舖、伊藤久右衛門、伊藤軒、藤菜美醬油糰子，最後前往 GOKAGO 喝抹茶！", 
             mapQuery: "Sannenzaka", 
             icon: "ph-shopping-bag", 
             iconColor: "text-pink-500",
@@ -348,6 +333,7 @@
             routeStops: [
               { name: "清水順正 おかべ家 (午餐)", mapQuery: "Kiyomizu+Junsei+Okabeya" },
               { name: "七味家本舖", mapQuery: "Shichimiya+Honpo" },
+              { name: "伊藤久右衛門 清水産寧坂店", mapQuery: "Itokyuemon+Kiyomizu" },
               { name: "伊藤軒/SOU・SOU 清水店", mapQuery: "Ito-ken+SOU+SOU+Kiyomizu" },
               { name: "藤菜美 三年坂本店", mapQuery: "Fujinami+Sannenzaka" },
               { name: "GOKAGO (抹茶)", mapQuery: "GOKAGO+Kyoto" }
@@ -368,41 +354,49 @@
           { time: "14:00-15:30", title: "伊根舟屋 ＆ 觀光遊船", transport: "私人包車", desc: "搭乘遊船(¥1200/人)餵海鷗老鷹，近距離拍攝水上舟屋。", mapQuery: "Ine+no+Funaya" },
           { time: "15:30-16:30", title: "下午茶：舟屋日和", transport: "步行", desc: "在絕美海景咖啡廳享受慢活節奏☕️。", mapQuery: "Funaya+Biyori", icon: "ph-coffee", iconColor: "text-amber-700" },
           { time: "16:30-19:00", title: "跨城直達 ➔ 大阪 The Peak", transport: "私人包車", desc: "車上睡覺休息，司機連人帶行李直達大阪飯店門口。", mapQuery: "The+Peak+Nipponbashi+Apartment", voucherType: "osaka_hotel" },
-          { time: "19:30-21:00", title: "晚餐：天ぷら まきの (Makino)", transport: "步行散步", desc: "前往難波千日前店享用現炸現上的超人氣天婦羅，餐後散步回飯店。", mapQuery: "Tempura+Makino+Namba+Sennichimae", icon: "ph-bowl-food", iconColor: "text-orange-500" }
+          { time: "19:30-21:00", title: "晚餐：天ぷら まきの (Makino)", transport: "步行散步", desc: "前往難波千日前店享用現炸現上的超人氣天婦羅。", mapQuery: "Tempura+Makino+Namba+Sennichimae", icon: "ph-bowl-food", iconColor: "text-orange-500" },
+          { time: "21:15-23:00", title: "道頓堀探路與藥妝第一輪", transport: "步行散步", desc: "前往道頓堀欣賞戎橋、固力果夜景，並至唐吉訶德＋藥妝進行第一輪採買（先買必買品項、熟悉店鋪位置）。", mapQuery: "Dotonbori", icon: "ph-shopping-bag", iconColor: "text-pink-500" }
         ]
       },
       {
         day: "Day 4", date: "8/28 (五)",
         events: [
-          { time: "08:30-09:30", title: "日本橋 ➔ 箕面萱野", transport: "地鐵", desc: "「日本橋站」搭 1 站至難波，轉御堂筋線直達終點。", mapQuery: "Minoh-kayano+Station", routeStops: ["日本橋 (千日前線)", "難波 (轉乘御堂筋線)", "心齋橋", "本町", "梅田", "新大阪", "千里中央", "箕面萱野"] },
-          { time: "09:30-11:00", title: "勝尾寺", transport: "計程車", desc: "拍攝滿山達摩不倒翁。", mapQuery: "Katsuoji" },
-          { time: "11:00-13:00", title: "午餐：蕎麦処 KAJIKASOU", transport: "計程車", desc: "享受大正浪漫風情庭園與精緻蕎麥麵 (事前預約)。", mapQuery: "Kajikasou+Minoh" },
-          { time: "13:00-14:00", title: "箕面 ➔ 大阪城公園", transport: "阪急轉地鐵", desc: "阪急搭至「石橋阪大前」轉車至梅田，轉地鐵至「森之宮站」。", mapQuery: "Osaka+Castle+Park", routeStops: ["箕面站 (阪急箕面線)", "石橋阪大前站 (轉乘寶塚本線)", "大阪梅田站 (步行轉乘地鐵)", "東梅田站 (谷町線)", "谷町四丁目站 (轉乘中央線)", "森之宮站"] },
-          { time: "14:00-15:00", title: "大阪城公園散策", transport: "步行", desc: "不登天守閣，於護城河外圍與巨石前合影。", mapQuery: "Osaka+Castle" },
-          { time: "15:00-15:30", title: "森之宮 ➔ 天王寺", transport: "JR", desc: "搭乘 JR 環狀線一車直達天王寺站，前往阿倍野。", mapQuery: "Tennoji+Station", routeStops: ["森之宮 (JR環狀線)", "玉造", "鶴橋", "桃谷", "寺田町", "天王寺"] },
-          { time: "15:30-17:30", title: "Q's Mall ＆ ABC Craft 買毛線", transport: "步行", desc: "手作控天堂！前往全日本最大級手藝行 ABC Craft 採買毛線。", mapQuery: "ABC+Craft+Abeno+Qs+Mall", icon: "ph-shopping-bag", iconColor: "text-purple-500" },
-          { time: "17:30-19:30", title: "通天閣 ＆ 新世界晚餐", transport: "地鐵/步行", desc: "前往新世界體驗 TOWER SLIDER，晚餐享用名產串炸。", mapQuery: "Tsutenkaku" },
-          { time: "19:30-20:00", title: "返回 The Peak", transport: "地鐵", desc: "搭乘堺筋線至「日本橋站」，出站即到家。", mapQuery: "The+Peak+Nipponbashi+Apartment", routeStops: ["惠美須町 (堺筋線)", "日本橋"] }
+          { time: "08:30-09:30", title: "日本橋 ➔ 箕面萱野", transport: "地鐵 (約45分)", desc: "「日本橋站」搭 1 站至難波，轉御堂筋線直達終點。", mapQuery: "Minoh-kayano+Station", routeStops: ["日本橋 (千日前線)", "難波 (轉乘御堂筋線)", "心齋橋", "本町", "梅田", "新大阪", "千里中央", "箕面萱野"] },
+          { time: "09:30-11:00", title: "勝尾寺", transport: "計程車 (約15分)", desc: "拍攝滿山達摩不倒翁。", mapQuery: "Katsuoji" },
+          { time: "11:00-13:00", title: "午餐：蕎麦処 KAJIKASOU", transport: "計程車 (約15分)", desc: "享受大正浪漫風情庭園與精緻蕎麥麵 (事前預約)。", mapQuery: "Kajikasou+Minoh" },
+          { time: "13:00-14:00", title: "箕面 ➔ 大阪城公園", transport: "阪急轉地鐵 (約60分)", desc: "阪急搭至「石橋阪大前」轉車至梅田，轉地鐵至「森之宮站」。", mapQuery: "Osaka+Castle+Park", routeStops: ["箕面站 (阪急箕面線)", "石橋阪大前站 (轉乘寶塚本線)", "大阪梅田站 (步行轉乘地鐵)", "東梅田站 (谷町線)", "谷町四丁目站 (轉乘中央線)", "森之宮站"] },
+          { time: "14:00-14:30", title: "大阪城公園快速打卡", transport: "步行", desc: "停留30分鐘：外圍與巨石合影，不入天守閣。", mapQuery: "Osaka+Castle" },
+          { time: "14:30-15:00", title: "大阪城 ➔ 心齋橋", transport: "地鐵 (約20分)", desc: "搭乘地鐵前往心齋橋商圈。", mapQuery: "Shinsaibashi-suji", routeStops: ["森之宮 (中央線)", "本町 (轉乘御堂筋線)", "心齋橋"] },
+          { time: "15:00-16:00", title: "Stüssy Osaka 採買", transport: "步行", desc: "優先完成潮牌 Stüssy 購物！", mapQuery: "Stussy+Osaka", icon: "ph-shopping-bag", iconColor: "text-indigo-500" },
+          { time: "16:00-16:30", title: "心齋橋 ➔ 天王寺", transport: "地鐵 (約15分)", desc: "搭乘御堂筋線至天王寺站。", mapQuery: "Tennoji+Station", routeStops: ["心齋橋 (御堂筋線)", "難波", "大国町", "動物園前", "天王寺"] },
+          { time: "16:30-17:00", title: "ABC Craft 買毛線", transport: "步行", desc: "Q's Mall 內全日本最大級手藝行，停留約 30 分鐘採買毛線。", mapQuery: "ABC+Craft+Abeno+Qs+Mall", icon: "ph-shopping-bag", iconColor: "text-purple-500" },
+          { time: "17:00-19:00", title: "通天閣 ＆ 新世界晚餐", transport: "地鐵/步行", desc: "前往新世界體驗 TOWER SLIDER，晚餐享用名產串炸。", mapQuery: "Tsutenkaku" },
+          { time: "19:00-19:30", title: "返回 The Peak", transport: "地鐵 (約10分)", desc: "搭乘堺筋線至「日本橋站」，出站即到家。", mapQuery: "The+Peak+Nipponbashi+Apartment", routeStops: ["惠美須町 (堺筋線)", "日本橋"] }
         ]
       },
       {
         day: "Day 5", date: "8/29 (六)",
         events: [
-          { time: "08:30-10:00", title: "早餐：木津市場", transport: "地鐵", desc: "搭至「動物園前站」轉乘至「大国町站」出站即達。", mapQuery: "Kizu+Market", routeStops: ["日本橋 (堺筋線)", "動物園前 (轉乘御堂筋線)", "大国町"] },
+          { time: "08:30-10:00", title: "早餐：木津市場", transport: "地鐵 (約15分)", desc: "搭至「動物園前站」轉乘至「大国町站」出站即達。", mapQuery: "Kizu+Market", routeStops: ["日本橋 (堺筋線)", "動物園前 (轉乘御堂筋線)", "大国町"] },
           { time: "10:00-11:00", title: "難波八阪神社", transport: "步行", desc: "距木津市場極近，順光拍攝巨型獅子頭。", mapQuery: "Namba+Yasaka+Jinja" },
-          { time: "11:00-11:30", title: "大国町 ➔ 梅田", transport: "地鐵", desc: "一車直達梅田，免換車。", mapQuery: "Umeda+Station", routeStops: ["大国町 (御堂筋線)", "難波", "心齋橋", "本町", "淀屋橋", "梅田"] },
-          { time: "11:30-14:30", title: "午餐：滝見小路", transport: "步行", desc: "於藍天大廈 B1 復古美食街享用午餐。", mapQuery: "Takimi+Koji" },
-          { time: "14:30-17:00", title: "梅田空中庭園展望台", transport: "電梯", desc: "欣賞日落前的大阪市景。", mapQuery: "Umeda+Sky+Building" },
-          { time: "17:00-20:00", title: "心齋橋 / 道頓堀 採買", transport: "地鐵", desc: "梅田直達心齋橋，集中火力買齊藥妝與雜貨。", mapQuery: "Shinsaibashi-suji", icon: "ph-shopping-bag", iconColor: "text-pink-500", routeStops: ["梅田 (御堂筋線)", "淀屋橋", "本町", "心齋橋"] },
-          { time: "20:00-21:30", title: "晚餐：鶏Soba 座銀 (Zagin)", transport: "步行", desc: "享用大阪頂級雞白湯拉麵「座銀」，餐後提著戰利品回飯店。", mapQuery: "Tori+Soba+Zagin+Niboshi", icon: "ph-bowl-food", iconColor: "text-orange-500" }
+          { time: "11:00-11:30", title: "大国町 ➔ 梅田", transport: "地鐵直達 (約15分)", desc: "一車直達梅田，免換車。", mapQuery: "Umeda+Station", routeStops: ["大国町 (御堂筋線)", "難波", "心齋橋", "本町", "淀屋橋", "梅田"] },
+          { time: "11:30-13:30", title: "午餐：滝見小路", transport: "步行", desc: "於藍天大廈 B1 復古美食街享用午餐 (停留2小時)。", mapQuery: "Takimi+Koji" },
+          { time: "13:30-15:30", title: "梅田空中庭園展望台", transport: "電梯", desc: "欣賞高空大阪市景 (停留約2小時)。", mapQuery: "Umeda+Sky+Building" },
+          { time: "15:30-16:00", title: "梅田 ➔ 心齋橋", transport: "地鐵 (約15分)", desc: "搭乘御堂筋線直達心齋橋。", mapQuery: "Shinsaibashi-suji", routeStops: ["梅田 (御堂筋線)", "淀屋橋", "本町", "心齋橋"] },
+          { time: "16:00-17:00", title: "Onitsuka Tiger 心齋橋店", transport: "步行", desc: "專屬買鞋行程！", mapQuery: "Onitsuka+Tiger+Shinsaibashi", icon: "ph-sneaker", iconColor: "text-amber-600" },
+          { time: "17:00-20:00", title: "心齋橋筋商店街 ＆ 大丸/PARCO", transport: "步行", desc: "完整逛街購物約 3 小時，包含大丸心齋橋與 PARCO 百貨。", mapQuery: "Shinsaibashi-suji", icon: "ph-shopping-bag", iconColor: "text-pink-500" },
+          { time: "20:00-21:00", title: "晚餐：鶏Soba 座銀 (Zagin)", transport: "步行", desc: "享用大阪頂級雞白湯拉麵「座銀」。", mapQuery: "Tori+Soba+Zagin+Niboshi", icon: "ph-bowl-food", iconColor: "text-orange-500" },
+          { time: "21:00-22:00", title: "道頓堀夜景 ＆ 藥妝第二輪", transport: "步行", desc: "散步至戎橋、固力果拍照，並進行唐吉訶德＋藥妝正式大量補貨。", mapQuery: "Dotonbori", icon: "ph-shopping-bag", iconColor: "text-pink-500" }
         ]
       },
       {
         day: "Day 6", date: "8/30 (日)",
         events: [
-          { time: "08:30-11:00", title: "起床打包 ＆ 早午餐", transport: "步行", desc: "就近於商圈吃早餐，11:00 辦理退房。", mapQuery: "Nipponbashi" },
-          { time: "11:00-11:15", title: "返回住宿樓下門口", transport: "步行", desc: "推行李至 The Peak 一樓大門，等待專車。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
-          { time: "11:15-12:30", title: "專車直達關西機場", transport: "INNN 拼車", desc: "行李交給司機，全家上車補眠，直達 KIX 出境大廳。", mapQuery: "Kansai+International+Airport" },
+          { time: "07:30-08:15", title: "外帶 Dekasan 三明治早餐", transport: "步行", desc: "前往購買指定早餐，外帶回飯店享用。", mapQuery: "Nipponbashi" },
+          { time: "08:15-10:30", title: "飯店早餐 ＆ 最後打包行李", transport: "飯店內", desc: "享用美味三明治，將戰利品與行李完全收妥。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
+          { time: "10:30-11:00", title: "Check-out 辦理退房", transport: "步行", desc: "檢查房間無遺漏物品，行李集中大廳。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
+          { time: "11:00", title: "飯店門口等候送機司機", transport: "INNN 拼車", desc: "固定集合時間：11:00 準時於 The Peak 一樓大門口上車。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
+          { time: "11:00-12:30", title: "專車直達關西機場", transport: "拼車 (約60分)", desc: "車上補眠，直達 KIX 出境大廳。", mapQuery: "Kansai+International+Airport" },
           { time: "12:30-16:15", title: "機場報到與免稅衝刺", transport: "步行", desc: "報到掛行李，採買最後伴手禮。", mapQuery: "Kansai+International+Airport" },
           { time: "16:15-18:15", title: "國泰航空 CX565 (KIX ➔ TPE)", transport: "飛行 (約3小時)", desc: "帶著滿滿戰利品返回台灣，旅途圓滿結束！", mapQuery: "", voucherType: "flight" },
           { time: "18:15", title: "桃園機場 ➔ 台中專車接送", transport: "樂高專車", desc: "抵達台灣後，專車接送返回台中溫暖的家。", mapQuery: "", voucherType: "transfer" }
@@ -630,7 +624,7 @@
             } else if (t.includes('步行') || t.includes('散步') || t.includes('順坡')) {
                 transportColor = 'bg-stone-100 text-stone-600';
                 transportIcon = 'ph-sneaker';
-            } else if (t.includes('電梯') || t.includes('纜車') || t.includes('船') || t.includes('行程內建')) {
+            } else if (t.includes('電梯') || t.includes('纜車') || t.includes('船') || t.includes('行程內建') || t.includes('飯店內')) {
                 transportColor = 'bg-purple-100 text-purple-700';
                 transportIcon = 'ph-paper-plane-tilt';
             }
@@ -662,7 +656,6 @@
         currentDayIndex = index;
         renderDaySelector();
         renderItinerary();
-        // 讓行程清單滾動容器瞬間回到最頂端
         const mainContainer = document.querySelector('main');
         if (mainContainer) mainContainer.scrollTop = 0;
     }
