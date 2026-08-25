@@ -396,7 +396,7 @@
           { time: "08:15-10:30", title: "飯店早餐 ＆ 最後打包行李", transport: "飯店內", desc: "享用美味三明治，將戰利品與行李完全收妥。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
           { time: "10:30-11:00", title: "Check-out 辦理退房", transport: "步行", desc: "檢查房間無遺漏物品，行李集中大廳。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
           { time: "11:00", title: "飯店門口等候送機司機", transport: "INNN 拼車", desc: "固定集合時間：11:00 準時於 The Peak 一樓大門口上車。", mapQuery: "The+Peak+Nipponbashi+Apartment" },
-          { time: "11:00-12:30", title: "專車直達關西機場", transport: "拼車 (約60分)", desc: "車上補眠，直達 KIX 出境大廳。", mapQuery: "Kansai+International+Airport" },
+          { time: "11:00-12:30", title: "專車直達關西機場", transport: "拼車 (約60分)", desc: "車上補pered，直達 KIX 出境大廳。", mapQuery: "Kansai+International+Airport" },
           { time: "12:30-16:15", title: "機場報到與免稅衝刺", transport: "步行", desc: "報到掛行李，採買最後伴手禮。", mapQuery: "Kansai+International+Airport" },
           { time: "16:15-18:15", title: "國泰航空 CX565 (KIX ➔ TPE)", transport: "飛行 (約3小時)", desc: "帶著滿滿戰利品返回台灣，旅途圓滿結束！", mapQuery: "", voucherType: "flight" },
           { time: "18:15", title: "桃園機場 ➔ 台中專車接送", transport: "樂高專車", desc: "抵達台灣後，專車接送返回台中溫暖的家。", mapQuery: "", voucherType: "transfer" }
@@ -481,7 +481,7 @@
       { 
         category: "🧴 日常用品", 
         items: [ 
-          { name: "保養品 / 化妝品", isDone: false }, 
+          { name: "保養品 / 化粧品", isDone: false }, 
           { name: "防曬 / 卸妝", isDone: false }, 
           { name: "梳子 / 髮油 / 香水", isDone: false }, 
           { name: "衛生紙、濕紙巾", isDone: false },
@@ -502,10 +502,19 @@
       }
     ];
 
-    let dynamicExpenses = [{ id: 1, name: "ICOCA 儲值 (4人)", amount: 2100, method: "現金" }];
+    // 改為從 localStorage 讀取，若沒有才給預設值，保護妳手動紀錄的資料不被覆蓋
+    let dynamicExpenses = JSON.parse(localStorage.getItem('kansaiapp_expenses')) || [
+      { id: 1, name: "ICOCA 儲值 (4人)", amount: 2100, method: "現金" }
+    ];
+
     let currentExchangeRate = 0.20;
     let currentDayIndex = 0; // 預設跳到 Day 1
     let fixedBudgetExpanded = { paid: false, unpaid: true }; // 預設打開待付款，收起已付清
+
+    // 自動儲存記帳資料到 localStorage
+    function saveExpenses() {
+        localStorage.setItem('kansaiapp_expenses', JSON.stringify(dynamicExpenses));
+    }
 
     // 自動抓取即時匯率
     async function fetchLiveExchangeRate() {
@@ -795,6 +804,7 @@
         const method = document.getElementById('expense-method').value;
         if(name && amount) {
             dynamicExpenses.push({ id: Date.now(), name: name, amount: parseInt(amount, 10), method: method });
+            saveExpenses(); // 儲存至 localStorage
             document.getElementById('expense-name').value = '';
             document.getElementById('expense-amount').value = '';
             document.getElementById('jpy-input').value = '';
@@ -804,6 +814,7 @@
 
     function removeExpense(id) {
         dynamicExpenses = dynamicExpenses.filter(exp => exp.id !== id);
+        saveExpenses(); // 儲存至 localStorage
         renderDynamicExpenses();
     }
 
